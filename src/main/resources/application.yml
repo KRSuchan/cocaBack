@@ -1,0 +1,25 @@
+spring:
+  output:
+    ansi:
+      enabled: always
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/COCA?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+  cloud:
+    aws:
+      credentials:
+        access-key: AKIAYS2NWWR64NVU6UE4
+        secret-key: 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
+      s3:
+        bucket: cocaattachments
+      region:
+        static: ap-northeast-2
