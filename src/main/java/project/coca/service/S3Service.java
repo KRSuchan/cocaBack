@@ -3,7 +3,7 @@ package project.coca.service;
 import io.awspring.cloud.s3.ObjectMetadata;
 import io.awspring.cloud.s3.S3Operations;
 import io.awspring.cloud.s3.S3Resource;
-import lombok.Value;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,16 +16,19 @@ import java.io.InputStream;
 
 @Service
 public class S3Service {
-    private static final String BUCKET=System.getenv("AWS_S3_BUCKET");
+    @Value("${spring.cloud.aws.s3.bucket}")
+    private String BUCKET;
     private final S3Operations s3Operations;
 
     public S3Service(S3Operations s3Operations) {
         this.s3Operations = s3Operations;
     }
     @Transactional
-    public ResponseEntity<?> upload(MultipartFile multipartFile, String key) throws IOException {
+    public ResponseEntity<?> uploadImage(MultipartFile multipartFile, String key) throws IOException {
+        System.out.println(BUCKET);
         if (!MediaType.IMAGE_PNG.toString().equals(multipartFile.getContentType()) &&
                 !MediaType.IMAGE_JPEG.toString().equals(multipartFile.getContentType())) {
+            System.out.println("사진 파일만 업로드 가능합니다");
             return ResponseEntity.badRequest().body("사진 파일만 업로드 가능합니다");
         }
 
@@ -38,7 +41,7 @@ public class S3Service {
     }
 
     @Transactional
-    public ResponseEntity<?> download(@RequestParam String key) {
+    public ResponseEntity<?> downloadImage(@RequestParam String key) {
         S3Resource s3Resource = s3Operations.download(BUCKET, key);
 
         if (MediaType.IMAGE_PNG.toString().equals(s3Resource.contentType())) {
