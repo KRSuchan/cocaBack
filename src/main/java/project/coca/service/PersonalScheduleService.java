@@ -21,8 +21,8 @@ public class PersonalScheduleService {
     /**
      * 개인 일정 등록
      *
-     * @param personalSchedule
-     * @return
+     * @param personalSchedule : 작성한 개인 일정 id를 제외한 전체
+     * @return : 저장된 개인 일정 return
      */
     public PersonalSchedule savePersonalSchedule(PersonalSchedule personalSchedule) {
         /**
@@ -34,8 +34,8 @@ public class PersonalScheduleService {
     /**
      * 개인 일정 목록 조회 (시작시간 ~ 끝나는시간)
      *
-     * @param start
-     * @param end
+     * @param start : 기간 시작
+     * @param end   : 기간 끝
      * @return List<PersonalSchedule>
      */
     public List<PersonalSchedule> findPersonalSchedulesByDates(LocalDate start, LocalDate end) {
@@ -50,8 +50,8 @@ public class PersonalScheduleService {
     /**
      * 개인 일정 상세 정보 조회
      *
-     * @param id
-     * @return
+     * @param id : 개인 일정 id
+     * @return : 조회된 개인 일정
      */
     public Optional<PersonalSchedule> findPersonalScheduleById(Long id) {
         return personalScheduleRepository.findById(id);
