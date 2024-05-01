@@ -25,7 +25,7 @@ public class PersonalScheduleService {
      * @return : 저장된 개인 일정 return
      */
     public PersonalSchedule savePersonalSchedule(PersonalSchedule personalSchedule) {
-        /**
+        /*
          * TODO Member의 검증 필요
          */
         return personalScheduleRepository.save(personalSchedule);
@@ -39,7 +39,7 @@ public class PersonalScheduleService {
      * @return List<PersonalSchedule>
      */
     public List<PersonalSchedule> findPersonalSchedulesByDates(LocalDate start, LocalDate end) {
-        /**
+        /*
          * TODO Member의 검증 필요
          */
         LocalDateTime startDT = start.atStartOfDay();
