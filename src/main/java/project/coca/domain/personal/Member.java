@@ -20,6 +20,27 @@ public class Member {
     @Column(name = "PROFILE_IMG_PATH")
     private String profileImgPath;
 
+    @Builder
+    public Member(String id, String pw) {
+        this.id = id;
+        this.password = pw;
+    }
+
+    @Builder
+    public Member(String id, String pw, String userName, String profileImgPath) {
+        this.id = id;
+        this.password = pw;
+        this.userName = userName;
+        this.profileImgPath = profileImgPath;
+    }
+
+    @Builder
+    public Member(String id, String pw, String userName) {
+        this.id = id;
+        this.password = pw;
+        this.userName = userName;
+    }
+
     // todo: onetomany group (for creator)
     // todo: onetomany groupMember (for attendee)
     // todo: onetomany groupManager
