@@ -16,11 +16,16 @@ public class Friend {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "FRIEND_ID")
     private Long id;
-    @Column(name = "MEMBER1_NICKNAME")
+    @Column(name = "MEMBER1_NICKNAME", nullable = false, length = 20)
     private String member1Nickname;
-    @Column(name = "MEMBER2_NICKNAME")
+    @Column(name = "MEMBER2_NICKNAME", nullable = false, length = 20)
     private String member2Nickname;
 
-    // todo: manytoone Member (member1)
-    // todo: manytoone Member (member1)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MEMBER1_ID", nullable = false)
+    private Member member1;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MEMBER2_ID", nullable = false)
+    private Member member2;
 }

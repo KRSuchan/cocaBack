@@ -21,5 +21,7 @@ public class GroupScheduleAttachment {
     @Column(name = "FILE_PATH")
     private String filePath;
 
-    // todo: ManyToOne group_schedule
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "GROUP_SCHEDULE_ID", nullable = false)
+    private GroupSchedule groupSchedule;
 }

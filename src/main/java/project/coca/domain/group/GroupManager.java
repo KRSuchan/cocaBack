@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import project.coca.domain.personal.Member;
 
 @Getter
 @Setter
@@ -17,6 +18,11 @@ public class GroupManager {
     @Column(name = "GROUP_MANAGER_ID")
     private Long id;
 
-    // todo: manytoone member
-    // todo: manytoone group
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MANAGER_USER_ID", nullable = false)
+    private Member groupManager;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "GROUP_ID", nullable = false)
+    private CoGroup coGroup;
 }

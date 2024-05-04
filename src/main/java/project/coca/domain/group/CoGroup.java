@@ -5,6 +5,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import project.coca.domain.personal.Member;
+import project.coca.domain.request.GroupRequest;
+import project.coca.domain.tag.GroupTag;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -16,19 +22,32 @@ public class CoGroup {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "GROUP_ID")
     private Long id;
-    @Column(name = "NAME")
+    @Column(name = "NAME", length = 20, nullable = false)
     private String name;
-    @Column(name = "DESCRIPTION")
+    @Column(name = "DESCRIPTION", length = 500, nullable = false)
     private String description;
-    @Column(name = "PRIVATE_PASSWORD")
+    @Column(name = "PRIVATE_PASSWORD", length = 16)
     private String privatePassword;
 
-    // todo: OneToMany group_admin_id (<- Member class)
-    // todo: onetoone group_notice
-    // todo: onetomany group_request
-    // todo: onetomany group_tag
-    // todo: onetomany group_manager
-    // todo: onetomany group_member
-    // todo: onetomany group_schedule
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "GROUP_ADMIN_ID", nullable = false)
+    private Member admin;
 
+    @OneToMany(mappedBy = "coGroup", cascade = CascadeType.ALL)
+    private List<GroupManager> groupManager = new ArrayList<>();
+
+    @OneToMany(mappedBy = "coGroup", cascade = CascadeType.ALL)
+    private List<GroupMember> groupMembers = new ArrayList<>();
+
+    @OneToOne(mappedBy = "coGroup", cascade = CascadeType.ALL)
+    private GroupNotice groupNotice;
+
+    @OneToMany(mappedBy = "coGroup", cascade = CascadeType.ALL)
+    private List<GroupSchedule> groupSchedule = new ArrayList<>();
+
+    @OneToMany(mappedBy = "coGroup", cascade = CascadeType.ALL)
+    private List<GroupRequest> groupRequests = new ArrayList<>();
+
+    @OneToMany(mappedBy = "coGroup", cascade = CascadeType.ALL)
+    private List<GroupTag> groupTags = new ArrayList<>();
 }
