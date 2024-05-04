@@ -16,10 +16,12 @@ public class PersonalScheduleAttachment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PERSONAL_SCHEDULE_ATTACHMENT_ID")
     private Long id;
-    @Column(name = "FILE_NAME")
+    @Column(name = "FILE_NAME", nullable = false)
     private String fileName;
-    @Column(name = "FILE_PATH")
+    @Column(name = "FILE_PATH", nullable = false)
     private String filePath;
 
-    // todo: ManyToOne personal_schedule
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "PERSONAL_SCHEDULE_ID")
+    private PersonalSchedule personalSchedule;
 }

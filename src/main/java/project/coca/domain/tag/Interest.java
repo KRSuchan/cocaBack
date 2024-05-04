@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import project.coca.domain.personal.Member;
 
 @Getter
 @Setter
@@ -17,6 +18,11 @@ public class Interest {
     @Column(name = "INTEREST_ID")
     private Long id;
 
-    // todo: manytoone tag
-    // todo: manytoone member
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MEMBER_ID", nullable = false)
+    private Member member;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "TAG_ID", nullable = false)
+    private Tag tag;
 }

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import project.coca.domain.group.CoGroup;
 
 @Getter
 @Setter
@@ -14,9 +15,14 @@ import lombok.ToString;
 public class GroupTag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "GROUP_TAG")
+    @Column(name = "GROUP_TAG_ID")
     private Long id;
 
-    // todo: manytoone group
-    // todo: manytoone tag
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "GROUP_ID", nullable = false)
+    private CoGroup coGroup;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "GROUP_TAG", nullable = false)
+    private Tag tag;
 }

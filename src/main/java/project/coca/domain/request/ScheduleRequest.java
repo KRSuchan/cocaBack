@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
+import project.coca.domain.personal.Member;
 
 import java.time.LocalDateTime;
 
@@ -25,8 +26,15 @@ public class ScheduleRequest {
     @Column(updatable = false, name = "CREATED_AT")
     private LocalDateTime createdDate;
 
-    // todo: manytoone member for sender
-    // todo: manytoone member for reciever
-    // todo: manytoone requested_schedule
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "SENDER_ID", nullable = false)
+    private Member sender;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "RECEIVER_ID", nullable = false)
+    private Member receiver;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "REQUESTED_SCHEDULE_ID", nullable = false)
+    private RequestedSchedule requestedSchedule;
 }

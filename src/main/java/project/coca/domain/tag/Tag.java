@@ -6,6 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @Entity
@@ -16,11 +19,14 @@ public class Tag {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "TAG_ID")
     private Long id;
-    @Column(name = "FIELD")
+    @Column(name = "FIELD", length = 10, nullable = false)
     private String field;
-    @Column(name = "NAME")
+    @Column(name = "NAME", length = 10, nullable = false)
     private String name;
 
-    // todo: onetomany group_tag
-    // todo: onetomany interest
+    @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL)
+    private List<GroupTag> groupTags = new ArrayList<>();
+
+    @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL)
+    private List<Interest> interest = new ArrayList<>();
 }
