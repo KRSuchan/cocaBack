@@ -1,10 +1,7 @@
 package project.coca.domain.personal;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import project.coca.domain.group.CoGroup;
 import project.coca.domain.group.GroupManager;
 import project.coca.domain.group.GroupMember;
@@ -71,7 +68,7 @@ public class Member {
 
     @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL)
     private List<FriendRequest> friendRequestsAsReceiver = new ArrayList<>();
-  
+
     @Builder
     public Member(String id, String pw) {
         this.id = id;
