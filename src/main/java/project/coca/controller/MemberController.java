@@ -2,10 +2,7 @@ package project.coca.controller;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import project.coca.domain.personal.Member;
 import project.coca.service.MemberService;
 
@@ -35,9 +32,9 @@ public class MemberController {
     }
 
     @PostMapping("/loginReq")
-    public boolean LoginReq(@RequestParam String id, @RequestParam String pw) {
-        Member loginMember = new Member(id, pw);
-        return memberService.login(loginMember);
+    public boolean LoginReq(@RequestBody Member member) {
+//        Member loginMember = new Member(id, pw);
+        return memberService.login(member);
     }
 
     @PostMapping("/withdrawalReq")
