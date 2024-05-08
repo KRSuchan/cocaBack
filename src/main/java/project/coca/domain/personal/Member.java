@@ -82,11 +82,4 @@ public class Member {
         this.userName = userName;
         this.profileImgPath = profileImgPath;
     }
-
-    @Builder
-    public Member(String id, String pw, String userName) {
-        this.id = id;
-        this.password = pw;
-        this.userName = userName;
-    }
 }
