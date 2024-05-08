@@ -18,47 +18,29 @@ public class MemberController {
 
     //프로필 이미지는 필수 아님
     @PostMapping("/joinReq")
-    public boolean JoinReq(@RequestParam String id, @RequestParam String pw, @RequestParam String userName, @RequestParam(required = false) String profileImgPath) {
-        Member joinMember;
-
-        if(profileImgPath == null) {
-            joinMember = new Member(id, pw, userName);
-        }
-        else {
-            joinMember = new Member(id, pw, userName, profileImgPath);
-        }
-
+    public boolean JoinReq(@RequestBody Member joinMember) {
+        //프로필이미지url 없으면 걍 null로 해서 넘겨주면 되어요
         return memberService.memberJoin(joinMember);
     }
 
     @PostMapping("/loginReq")
-    public boolean LoginReq(@RequestBody Member member) {
-//        Member loginMember = new Member(id, pw);
-        return memberService.login(member);
+    public boolean LoginReq(@RequestBody Member loginMember) {
+        return memberService.login(loginMember);
     }
 
     @PostMapping("/withdrawalReq")
-    public boolean WithdrawalReq(@RequestParam String id, @RequestParam String pw) {
-        Member withdrawalMember = new Member(id, pw);
+    public boolean WithdrawalReq(@RequestBody Member withdrawalMember) {
         return memberService.withdrawal(withdrawalMember);
     }
 
     @PostMapping("/memberInfoInquiryReq")
-    public Member MemberInfoInquiryReq(@RequestParam String id, @RequestParam String pw) {
-        Member inquiryMember = new Member(id, pw);
+    public Member MemberInfoInquiryReq(@RequestBody Member inquiryMember) {
         return memberService.memberInfoInquiry(inquiryMember);
     }
 
     @PostMapping("/memberInfoUpdateReq")
-    public Member MemberInfoUpdateReq(@RequestParam String id, @RequestParam String pw, @RequestParam String userName, @RequestParam(required = false) String profileImgPath) {
-        Member newInfo;
-
-        if(profileImgPath == null) {
-            newInfo = new Member(id, pw, userName);
-        }
-        else {
-            newInfo = new Member(id, pw, userName, profileImgPath);
-        }
+    public Member MemberInfoUpdateReq(@RequestBody Member newInfo) {
+        //프로필이미지url 없으면 걍 null로 해서 넘겨주면 되어요
         return memberService.memberInfoUpdate(newInfo);
     }
 }
