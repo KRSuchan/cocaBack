@@ -97,7 +97,7 @@ public class PersonalScheduleController {
      * NOT_FOUND: memberId로 회원이 조회되지 않는 경우
      * CREATED: 그 외 정상, 해당 기간 존재하는 일정 반환
      */
-    @GetMapping("/detail/between-dates")
+    @GetMapping("/detail/date")
     public ApiResponse<List<PersonalScheduleResponse>> getPersonalSchedulesByDates(
             @RequestParam String memberId,
             @RequestParam LocalDate date) {
