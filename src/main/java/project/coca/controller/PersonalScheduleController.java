@@ -91,9 +91,8 @@ public class PersonalScheduleController {
      * 11. 개인 일정 상세 정보 조회
      * (FrontEnd 요청사항으로 LIST 반환)
      *
-     * @param memberId  회원 개인 id
-     * @param startDate 예시 : 2024-05-01
-     * @param endDate   예시 : 2024-05-31
+     * @param memberId 회원 개인 id
+     * @param date     예시 : 2024-05-01
      * @return ApiResponse
      * NOT_FOUND: memberId로 회원이 조회되지 않는 경우
      * CREATED: 그 외 정상, 해당 기간 존재하는 일정 반환
@@ -101,14 +100,12 @@ public class PersonalScheduleController {
     @GetMapping("/detail/between-dates")
     public ApiResponse<List<PersonalScheduleResponse>> getPersonalSchedulesByDates(
             @RequestParam String memberId,
-            @RequestParam LocalDate startDate,
-            @RequestParam LocalDate endDate) {
+            @RequestParam LocalDate date) {
         log.info("Get personal schedules by dates: {}", memberId);
-        log.info("Get personal schedules by dates: {}", startDate);
-        log.info("Get personal schedules by dates: {}", endDate);
+        log.info("Get personal schedules by dates: {}", date);
         try {
             List<PersonalSchedule> schedules =
-                    personalScheduleService.findPersonalSchedulesByDates(memberId, startDate, endDate);
+                    personalScheduleService.findPersonalSchedulesByDates(memberId, date, date);
             List<PersonalScheduleResponse> data = schedules
                     .stream()
                     .map(PersonalScheduleResponse::of)
