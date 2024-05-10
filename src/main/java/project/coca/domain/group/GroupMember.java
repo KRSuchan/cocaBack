@@ -7,6 +7,9 @@ import lombok.Setter;
 import lombok.ToString;
 import project.coca.domain.personal.Member;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @Entity
@@ -25,4 +28,7 @@ public class GroupMember {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "GROUP_ID", nullable = false)
     private CoGroup coGroup;
+
+    @OneToMany(mappedBy = "groupMember", cascade = CascadeType.ALL)
+    private List<GroupScheduleHeart> hearts = new ArrayList<>();
 }

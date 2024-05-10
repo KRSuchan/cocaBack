@@ -42,6 +42,10 @@ public class GroupSchedule {
     @Column(name = "COLOR", length = 7, nullable = false)
     private String color;
 
+    // 그룹 일정 가져오기, (하트)
+    @OneToMany(mappedBy = "groupSchedule", cascade = CascadeType.ALL)
+    private List<GroupScheduleHeart> hearts = new ArrayList<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "GROUP_ID", nullable = false)
     private CoGroup coGroup;
