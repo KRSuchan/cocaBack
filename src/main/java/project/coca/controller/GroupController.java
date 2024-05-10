@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 public class GroupController {
     private final GroupService groupService;
 
+    // todo 전체적으로 request, response 확인 필요
+
     /**
      * 07. 캘린더 목록 조회 (참가중인 그룹 목록 조회)
      */
@@ -149,6 +151,7 @@ public class GroupController {
 
     /**
      * 25. 그룹 수정
+     * todo: tag 추가
      */
     @PutMapping("/update")
     public ApiResponse<GroupResponse> updateGroup(@RequestBody GroupUpdateRequest request) {
