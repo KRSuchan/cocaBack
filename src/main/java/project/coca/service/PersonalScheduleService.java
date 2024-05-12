@@ -1,6 +1,5 @@
 package project.coca.service;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,12 +17,15 @@ import java.util.NoSuchElementException;
 
 @Service
 @Transactional
-@RequiredArgsConstructor
 public class PersonalScheduleService {
-    @Autowired
     private final PersonalScheduleRepository personalScheduleRepository;
-    @Autowired
     private final MemberRepository memberRepository;
+
+    @Autowired
+    public PersonalScheduleService(PersonalScheduleRepository personalScheduleRepository, MemberRepository memberRepository) {
+        this.personalScheduleRepository = personalScheduleRepository;
+        this.memberRepository = memberRepository;
+    }
 
     /**
      * 09. 개인 일정 등록

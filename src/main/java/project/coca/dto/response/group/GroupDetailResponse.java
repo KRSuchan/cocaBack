@@ -9,17 +9,21 @@ import java.util.stream.Collectors;
 
 @Data
 @Builder
-public class GroupResponse {
+public class GroupDetailResponse {
     private Long id;
     private String name;
+    private AdminResponse admin;
+    private String description;
     private Boolean isPrivate;
     private List<GroupTagResponse> groupTags;
     private Integer memberCount;
 
-    public static GroupResponse of(CoGroup group) {
-        return GroupResponse.builder()
+    public static GroupDetailResponse of(CoGroup group) {
+        return GroupDetailResponse.builder()
                 .id(group.getId())
                 .name(group.getName())
+                .admin(AdminResponse.of(group.getAdmin()))
+                .description(group.getDescription())
                 .isPrivate(group.getPrivatePassword() != null)
                 .groupTags(group.getGroupTags().stream()
                         .map(GroupTagResponse::of)
