@@ -31,7 +31,4 @@ public class GroupMember {
 
     @OneToMany(mappedBy = "groupMember", cascade = CascadeType.ALL)
     private List<GroupScheduleHeart> hearts = new ArrayList<>();
-
-    public GroupMember(Member member, CoGroup group) {
-    }
 }

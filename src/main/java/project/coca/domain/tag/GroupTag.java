@@ -23,6 +23,6 @@ public class GroupTag {
     private CoGroup coGroup;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "GROUP_TAG", nullable = false)
+    @JoinColumn(name = "TAG_ID", nullable = false)
     private Tag tag;
 }

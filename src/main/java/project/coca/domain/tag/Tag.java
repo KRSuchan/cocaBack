@@ -1,10 +1,7 @@
 package project.coca.domain.tag;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,4 +26,10 @@ public class Tag {
 
     @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL)
     private List<Interest> interest = new ArrayList<>();
+
+    @Builder
+    public Tag(String field, String name) {
+        this.field = field;
+        this.name = name;
+    }
 }
