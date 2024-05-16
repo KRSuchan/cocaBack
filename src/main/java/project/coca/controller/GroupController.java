@@ -88,6 +88,9 @@ public class GroupController {
         log.info("Add group creator: {}", creator);
         log.info("Add group group: {}", group);
         log.info("Add group group tags: {}", groupTags);
+        if (groupTags.size() > 3) {
+            return ApiResponse.fail(ErrorCode.BAD_REQUEST, "태그 수는 3개 이하이어야 합니다.");
+        }
         try {
             CoGroup savedGroup = groupService.saveGroup(creator, group, groupTags);
             GroupDetailResponse data = GroupDetailResponse.of(savedGroup);
@@ -164,14 +167,20 @@ public class GroupController {
      */
     @PutMapping("/update")
     public ApiResponse<?> updateGroup(@RequestBody GroupRequest request) {
-        log.info("update group admin : {}", request.getMember());
-        log.info("update group: {}", request.getGroup());
-        log.info("update group tags: {}", request.getGroupTags());
+        Member member = request.getMember();
+        CoGroup group = request.getGroup();
+        List<GroupTag> groupTags = request.getGroupTags();
+        log.info("update group admin : {}", member);
+        log.info("update group: {}", group);
+        log.info("update group tags: {}", groupTags);
+        if (groupTags.size() > 3) {
+            return ApiResponse.fail(ErrorCode.BAD_REQUEST, "태그 수는 3개 이하이어야 합니다.");
+        }
         try {
-            groupService.updateGroup(request.getGroup().getId(),
-                    request.getMember().getId(),
-                    request.getGroup(),
-                    request.getGroupTags());
+            groupService.updateGroup(group.getId(),
+                    member.getId(),
+                    group,
+                    groupTags);
             return ApiResponse.success(ResponseCode.OK, "수정 완료");
         } catch (NoSuchElementException e) {
             return ApiResponse.fail(ErrorCode.NOT_FOUND, e.getMessage());
