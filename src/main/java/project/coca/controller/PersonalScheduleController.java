@@ -3,9 +3,9 @@ package project.coca.controller;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import project.coca.domain.personal.Member;
 import project.coca.domain.personal.PersonalSchedule;
-import project.coca.domain.personal.PersonalScheduleAttachment;
 import project.coca.dto.request.PersonalScheduleRequest;
 import project.coca.dto.response.common.ApiResponse;
 import project.coca.dto.response.common.error.ErrorCode;
@@ -34,14 +34,16 @@ public class PersonalScheduleController {
      * NOT_FOUND: memberId로 회원이 조회되지 않는경우
      * CREATED: 그 외 정상 등록한 일정 반환
      */
-    @PostMapping("/add")
-    private ApiResponse<PersonalScheduleResponse> addPersonalSchedule(@RequestBody PersonalScheduleRequest request) {
+    @PostMapping(value = "/add", consumes = {"multipart/form-data"})
+    private ApiResponse<PersonalScheduleResponse> addPersonalSchedule(
+            @RequestPart("data") PersonalScheduleRequest request,
+            @RequestPart(value = "attachments", required = false) MultipartFile[] attachments) {
         PersonalSchedule personalSchedule = request.getPersonalSchedule();
         Member member = request.getMember();
-        List<PersonalScheduleAttachment> attachments = request.getAttachments();
         log.info("Add personal schedule member: {}", member);
         log.info("Add personal schedule: {}", personalSchedule);
-        log.info("Add personal schedule attachment: {}", attachments);
+        log.info("Add personal schedule attachment: {}", attachments[0].getName());
+        System.out.println(member.getId());
         try {
             PersonalSchedule savedSchedule = personalScheduleService.savePersonalSchedule(member, personalSchedule, attachments);
             PersonalScheduleResponse data = PersonalScheduleResponse.of(savedSchedule);
@@ -126,19 +128,19 @@ public class PersonalScheduleController {
      * @return : 수정된 개인 일정 내용
      * NOT_FOUND : memberId 혹은 scheduleId 로 조회가 되지 않는 경우
      */
-    @PostMapping("/update")
+    @PutMapping("/update")
     private ApiResponse<PersonalScheduleResponse> updatePersonalSchedule(
-            @RequestBody PersonalScheduleRequest request) {
+            @RequestPart("data") PersonalScheduleRequest request,
+            @RequestPart(value = "attachments", required = false) MultipartFile[] attachments) {
         PersonalSchedule personalSchedule = request.getPersonalSchedule();
         Member member = request.getMember();
-        List<PersonalScheduleAttachment> attachments = request.getAttachments();
         log.info("Update personal schedule member: {}", member);
         log.info("Update personal schedule: {}", personalSchedule);
-        log.info("Update personal schedule attachment: {}", attachments);
+        log.info("Update personal schedule attachment: {}", attachments[0].getOriginalFilename());
         try {
             PersonalSchedule savedSchedule = personalScheduleService.updatePersonalSchedule(member, personalSchedule, attachments);
             PersonalScheduleResponse data = PersonalScheduleResponse.of(savedSchedule);
-            return ApiResponse.success(ResponseCode.CREATED, "개인 일정 수정 성공", data);
+            return ApiResponse.success(ResponseCode.OK, "개인 일정 수정 성공", data);
         } catch (NoSuchElementException e) {
             // RequestParam 데이터로 검색되지 않은 데이터가 존재할 경우
             return ApiResponse.fail(ErrorCode.NOT_FOUND, e.getMessage());

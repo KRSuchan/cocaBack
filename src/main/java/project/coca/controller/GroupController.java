@@ -177,10 +177,7 @@ public class GroupController {
             return ApiResponse.fail(ErrorCode.BAD_REQUEST, "태그 수는 3개 이하이어야 합니다.");
         }
         try {
-            groupService.updateGroup(group.getId(),
-                    member.getId(),
-                    group,
-                    groupTags);
+            groupService.updateGroup(group.getId(), member.getId(), group, groupTags);
             return ApiResponse.success(ResponseCode.OK, "수정 완료");
         } catch (NoSuchElementException e) {
             return ApiResponse.fail(ErrorCode.NOT_FOUND, e.getMessage());
