@@ -1,6 +1,10 @@
 package project.coca.controller;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import project.coca.service.S3Service;
 
@@ -16,18 +20,19 @@ public class S3Controller {
         this.s3Service = s3Service;
     }
 
-    @PostMapping("/upload")
+    @PostMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile multipartFile, @RequestParam String key) {
         try {
-            return s3Service.uploadImage(multipartFile, key);
+            s3Service.uploadProfileImage(multipartFile, key);
+            return ResponseEntity.badRequest().body("이미지 업로드 중 오류가 발생했습니다");
         } catch (IOException e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().body("이미지 업로드 중 오류가 발생했습니다");
         }
     }
 
-    @GetMapping("/download")
-    public ResponseEntity<?> downloadImage(@RequestParam String key) {
-        return s3Service.downloadImage(key);
-    }
+//    @GetMapping("/download")
+//    public ResponseEntity<?> downloadImage(@RequestParam String key) {
+//        return s3Service.(key);
+//    }
 }
