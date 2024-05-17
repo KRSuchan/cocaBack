@@ -20,6 +20,8 @@ public class GroupScheduleAttachment {
     private String fileName;
     @Column(name = "FILE_PATH")
     private String filePath;
+    @Column(name = "FILE_HASH")
+    private String fileMd5;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "GROUP_SCHEDULE_ID", nullable = false)
