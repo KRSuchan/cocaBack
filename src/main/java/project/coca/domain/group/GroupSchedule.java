@@ -52,4 +52,12 @@ public class GroupSchedule {
 
     @OneToMany(mappedBy = "groupSchedule", cascade = CascadeType.ALL)
     private List<GroupScheduleAttachment> groupScheduleAttachments = new ArrayList<>();
+
+    public void addAttachment(GroupScheduleAttachment newAttach) {
+        groupScheduleAttachments.add(newAttach);
+    }
+
+    public void removeAttachment(GroupScheduleAttachment deleteAttachment) {
+        groupScheduleAttachments.remove(deleteAttachment);
+    }
 }
