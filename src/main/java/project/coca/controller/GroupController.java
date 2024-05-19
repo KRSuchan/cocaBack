@@ -5,18 +5,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.oxm.ValidationFailureException;
 import org.springframework.web.bind.annotation.*;
 import project.coca.domain.group.CoGroup;
+import project.coca.domain.group.GroupNotice;
 import project.coca.domain.personal.Member;
 import project.coca.domain.tag.GroupTag;
 import project.coca.dto.request.GroupRequest;
+import project.coca.dto.request.GroupUpdateRequest;
 import project.coca.dto.response.common.ApiResponse;
+import project.coca.dto.response.common.error.AlreadyReportedException;
 import project.coca.dto.response.common.error.ErrorCode;
 import project.coca.dto.response.common.success.ResponseCode;
-import project.coca.dto.response.group.GroupAdminResponse;
-import project.coca.dto.response.group.GroupDetailResponse;
-import project.coca.dto.response.group.GroupResponse;
+import project.coca.dto.response.group.*;
 import project.coca.service.GroupService;
 
-import javax.management.InstanceAlreadyExistsException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -44,7 +44,7 @@ public class GroupController {
             return ApiResponse.success(ResponseCode.OK, "그룹 참가 완료");
         } catch (NoSuchElementException e) {
             return ApiResponse.fail(ErrorCode.NOT_FOUND, e.getMessage());
-        } catch (ValidationFailureException | InstanceAlreadyExistsException e) {
+        } catch (ValidationFailureException | AlreadyReportedException e) {
             return ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage());
         } catch (Exception e) {
             return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -143,15 +143,16 @@ public class GroupController {
     /**
      * 23. 그룹 상세 정보 조회
      *
-     * @param groupId : 그룹 id
+     * @param memberId : 회원 id
+     * @param groupId  : 그룹 id
      * @return 그룹id, 그룹명, admin정보(id,이름,프사경로), 그룹 설명, 프라이빗 여부, 그룹 태그 list(id, field, name), 회원 수
      */
     @GetMapping("/detail")
-    public ApiResponse<GroupDetailResponse> findGroupDetail(@RequestParam Long groupId) {
+    public ApiResponse<GroupDetailSearchResponse> findGroupDetail(@RequestParam String memberId, @RequestParam Long groupId) {
+        log.info("find group detail for search memberId: {}", memberId);
         log.info("find group detail for search by groupId: {}", groupId);
         try {
-            CoGroup group = groupService.findGroupById(groupId);
-            GroupDetailResponse data = GroupDetailResponse.of(group);
+            GroupDetailSearchResponse data = groupService.findGroupById(memberId, groupId);
             return ApiResponse.response(ResponseCode.OK, data);
         } catch (NoSuchElementException e) {
             return ApiResponse.fail(ErrorCode.NOT_FOUND, e.getMessage());
@@ -162,22 +163,27 @@ public class GroupController {
 
     /**
      * 25. 그룹 수정
+     * 27. 그룹 공지 등록
+     * 29. 그룹 공지 수정
+     * 30. 그룹 공지 삭제
      *
      * @param request : Member(id면 충분), CoGroup(*id, *name, *description, password, notice)
      */
     @PutMapping("/update")
-    public ApiResponse<?> updateGroup(@RequestBody GroupRequest request) {
-        Member member = request.getMember();
+    public ApiResponse<?> updateGroup(@RequestBody GroupUpdateRequest request) {
+        Member member = request.getAdmin();
         CoGroup group = request.getGroup();
         List<GroupTag> groupTags = request.getGroupTags();
+        GroupNotice notice = request.getNotice();
         log.info("update group admin : {}", member);
         log.info("update group: {}", group);
         log.info("update group tags: {}", groupTags);
+        log.info("update group notice: {}", notice);
         if (groupTags.size() > 3) {
             return ApiResponse.fail(ErrorCode.BAD_REQUEST, "태그 수는 3개 이하이어야 합니다.");
         }
         try {
-            groupService.updateGroup(group.getId(), member.getId(), group, groupTags);
+            groupService.updateGroup(group.getId(), member.getId(), group, groupTags, notice);
             return ApiResponse.success(ResponseCode.OK, "수정 완료");
         } catch (NoSuchElementException e) {
             return ApiResponse.fail(ErrorCode.NOT_FOUND, e.getMessage());
@@ -195,14 +201,15 @@ public class GroupController {
      * @return :Group(id,name,description,pwd
      * ,tagList(id,field,name)
      * ,members(id,name,프사경로)
-     * ,managers(id,name,프사경로), 공지)
+     * ,managers(id,name,프사경로)
+     * ,notice
      */
     @PostMapping("/admin")
     public ApiResponse<GroupAdminResponse> findGroupForAdmin(@RequestBody GroupRequest request) {
         Member member = request.getMember();
         CoGroup group = request.getGroup();
-        log.info("find group for admin group: {}", group);
         log.info("find group for admin member : {}", member);
+        log.info("find group for admin group: {}", group);
         try {
             CoGroup findGroup = groupService.findGroupForAdmin(group, member);
             GroupAdminResponse data = GroupAdminResponse.of(findGroup);
@@ -229,6 +236,30 @@ public class GroupController {
         try {
             groupService.deleteGroup(adminId, groupId);
             return ApiResponse.success(ResponseCode.OK, "삭제 완료");
+        } catch (NoSuchElementException e) {
+            return ApiResponse.fail(ErrorCode.NOT_FOUND, e.getMessage());
+        } catch (ValidationFailureException e) {
+            return ApiResponse.fail(ErrorCode.UNAUTHORIZED, e.getMessage());
+        } catch (Exception e) {
+            return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    /**
+     * 28. 그룹 공지 조회
+     *
+     * @param memberId :회원 id
+     * @param groupId  : 그룹 id
+     * @return
+     */
+    @GetMapping("/notice")
+    public ApiResponse<GroupNoticeResponse> findGroupNotice(@RequestParam String memberId, @RequestParam Long groupId) {
+        log.info("find group notice memberId: {}", memberId);
+        log.info("find group notice groupId: {}", groupId);
+        try {
+            GroupNotice notice = groupService.findGroupNotice(memberId, groupId);
+            GroupNoticeResponse data = GroupNoticeResponse.of(notice);
+            return ApiResponse.response(ResponseCode.OK, data);
         } catch (NoSuchElementException e) {
             return ApiResponse.fail(ErrorCode.NOT_FOUND, e.getMessage());
         } catch (ValidationFailureException e) {

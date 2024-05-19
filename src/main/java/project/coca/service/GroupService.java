@@ -10,12 +10,14 @@ import org.springframework.transaction.annotation.Transactional;
 import project.coca.domain.group.CoGroup;
 import project.coca.domain.group.GroupManager;
 import project.coca.domain.group.GroupMember;
+import project.coca.domain.group.GroupNotice;
 import project.coca.domain.personal.Member;
 import project.coca.domain.tag.GroupTag;
 import project.coca.domain.tag.Tag;
+import project.coca.dto.response.common.error.AlreadyReportedException;
+import project.coca.dto.response.group.GroupDetailSearchResponse;
 import project.coca.repository.*;
 
-import javax.management.InstanceAlreadyExistsException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -28,6 +30,7 @@ public class GroupService {
     private final GroupManagerRepository groupManagerRepository;
     private final TagRepository tagRepository;
     private final GroupTagRepository groupTagRepository;
+    private final GroupNoticeRepository groupNoticeRepository;
 
     private Integer pageSize = 20;
 
@@ -36,13 +39,15 @@ public class GroupService {
                         MemberRepository memberRepository,
                         GroupMemberRepository groupMemberRepository,
                         GroupManagerRepository groupManagerRepository,
-                        TagRepository tagRepository, GroupTagRepository groupTagRepository) {
+                        TagRepository tagRepository, GroupTagRepository groupTagRepository,
+                        GroupNoticeRepository groupNoticeRepository) {
         this.groupRepository = groupRepository;
         this.memberRepository = memberRepository;
         this.groupMemberRepository = groupMemberRepository;
         this.groupManagerRepository = groupManagerRepository;
         this.tagRepository = tagRepository;
         this.groupTagRepository = groupTagRepository;
+        this.groupNoticeRepository = groupNoticeRepository;
     }
 
     /**
@@ -59,7 +64,7 @@ public class GroupService {
     /**
      * a1. 그룹 참가하기
      */
-    public void joinGroup(Member member, CoGroup group) throws InstanceAlreadyExistsException {
+    public void joinGroup(Member member, CoGroup group) {
         // 1. 회원 검증
         Member findMember = memberRepository.findById(member.getId())
                 .orElseThrow(() -> new NoSuchElementException("회원이 조회되지 않습니다."));
@@ -69,7 +74,7 @@ public class GroupService {
         // 3. 이미 참가중인가
         List<CoGroup> findJoinedGroups = groupRepository.findByGroupMemberId(findMember.getId());
         if (findJoinedGroups.contains(findGroup))
-            throw new InstanceAlreadyExistsException("이미 참가중입니다.");
+            throw new AlreadyReportedException("이미 참가중입니다.");
         // 그룹 패스워드 일치 여부
         if (findGroup.getPrivatePassword() == null
                 || findGroup.getPrivatePassword().equals(group.getPrivatePassword())) {
@@ -82,7 +87,6 @@ public class GroupService {
         } else {
             throw new ValidationFailureException("비밀번호가 잘못되었습니다.");
         }
-
     }
 
     /**
@@ -148,7 +152,9 @@ public class GroupService {
      * 22-1. 그룹 검색 by 그룹명
      */
     public List<CoGroup> findGroupsByNameLike(String groupName, Integer pageNumber) {
+        // 페이지 세팅
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        // 페이징한 데이터 가져오기
         Page<CoGroup> resultPage = groupRepository
                 .findByNameContainingOrderByGroupMembersDesc(groupName, pageable);
         return resultPage.getContent();
@@ -168,41 +174,80 @@ public class GroupService {
     /**
      * 23. 그룹 상세 정보 조회
      */
-    public CoGroup findGroupById(Long groupId) {
-        return groupRepository.findById(groupId)
+    public GroupDetailSearchResponse findGroupById(String memberId, Long groupId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("회원이 조회되지 않습니다."));
+        CoGroup group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NoSuchElementException("그룹이 조회되지 않습니다."));
+        return GroupDetailSearchResponse.of(group, member);
     }
 
     /**
      * 25. 그룹 수정
      */
-    public void updateGroup(Long groupId, String adminId, CoGroup updateGroup, List<GroupTag> groupTags) {
+    public void updateGroup(Long groupId,
+                            String adminId,
+                            CoGroup updateGroup,
+                            List<GroupTag> groupTags,
+                            GroupNotice notice) {
+        // 1. 그룹 조회
         CoGroup findGroup = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NoSuchElementException("그룹이 조회되지 않습니다."));
-        if (findGroup.getAdmin().getId().equals(adminId)) {
-            findGroup.setName(updateGroup.getName());
-            findGroup.setDescription(updateGroup.getDescription());
-            findGroup.setGroupManager(updateGroup.getGroupManager());
-            groupRepository.save(findGroup);
-            groupTagRepository.deleteAllByCoGroupId(findGroup.getId());
-            for (GroupTag groupTag : groupTags) {
-                groupTag.setCoGroup(findGroup);
-                Tag tag = tagRepository.findById(groupTag.getTag().getId()).get();
-                groupTag.setTag(tag);
-            }
-            findGroup.setGroupTags(groupTags);
-        } else {
+        // 2. admin 인가?
+        Member member = memberRepository.findById(adminId)
+                .orElseThrow(() -> new NoSuchElementException("회원이 조회되지 않습니다."));
+        if (!findGroup.getAdmin().equals(member)) {
             throw new ValidationFailureException("수정 권한이 없습니다.");
         }
+        // 3. 조회된 그룹 수정
+        findGroup.setName(updateGroup.getName());
+        findGroup.setDescription(updateGroup.getDescription());
+        findGroup.setGroupManager(updateGroup.getGroupManager());
+        // 4. 그룹 태그 모두 삭제 후 재세팅
+        groupTagRepository.deleteAllByCoGroupId(findGroup.getId());
+        for (GroupTag groupTag : groupTags) {
+            groupTag.setCoGroup(findGroup);
+            Tag tag = tagRepository.findById(groupTag.getTag().getId())
+                    .orElseThrow(() -> new NoSuchElementException("태그가 조회되지 않습니다."));
+            groupTag.setTag(tag);
+        }
+        findGroup.setGroupTags(groupTags);
+        // 5. 조회된 그룹의 공지 등록 / 수정 / 삭제
+        GroupNotice existingNotice = findGroup.getGroupNotice();
+        if (notice != null && notice.getContents() != null) {
+            if (existingNotice != null) {
+                // 기존 공지가 있는 경우 업데이트
+                existingNotice.setContents(notice.getContents());
+                existingNotice.setCoGroup(findGroup);
+                groupNoticeRepository.save(existingNotice);
+            } else {
+                // 새로운 공지 추가
+                notice.setCoGroup(findGroup);
+                groupNoticeRepository.save(notice);
+                findGroup.setGroupNotice(notice);
+            }
+        } else {
+            if (existingNotice != null) {
+                // 공지가 없는 경우 기존 공지 삭제
+                groupNoticeRepository.delete(existingNotice);
+                findGroup.setGroupNotice(null);
+            }
+        }
+        // 6. 수정된 그룹 저장
+        groupRepository.save(findGroup);
     }
 
     /**
      * 25-a. Admin을 위한 그룹 상세 정보 조회
      */
     public CoGroup findGroupForAdmin(CoGroup group, Member admin) {
+        // 1. 회원 조회
         Member findMember = memberRepository.findById(admin.getId())
                 .orElseThrow(() -> new NoSuchElementException("회원이 조회되지 않습니다."));
-        CoGroup findGroup = findGroupById(group.getId());
+        // 2. 그룹 조회
+        CoGroup findGroup = groupRepository.findById(group.getId())
+                .orElseThrow(() -> new NoSuchElementException("그룹이 조회되지 않습니다."));
+        // 3. 권한 검증 / admin 인가 / 최종 : 그룹 리턴
         if (!findMember.getPassword().equals(admin.getPassword())) {
             // 회원 pwd 불일치
             throw new NoSuchElementException("회원이 조회되지 않습니다.");
@@ -225,5 +270,19 @@ public class GroupService {
         } else {
             throw new ValidationFailureException("삭제 권한이 없습니다.");
         }
+    }
+
+    /**
+     * 28. 그룹 공지 조회
+     */
+    public GroupNotice findGroupNotice(String memberId, Long groupId) {
+        CoGroup findGroup = groupRepository.findById(groupId)
+                .orElseThrow(() -> new NoSuchElementException("그룹이 조회되지 않습니다."));
+        if (findGroup.getGroupMembers().stream()
+                .noneMatch(groupMember -> groupMember.getGroupMember().getId()
+                        .equals(memberId))) {
+            throw new ValidationFailureException("참가중이지 않습니다.");
+        }
+        return findGroup.getGroupNotice();
     }
 }

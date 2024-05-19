@@ -19,9 +19,6 @@ public class GroupAdminResponse {
     private List<GroupManagerResponse> groupManagers;
     private String groupNotice;
 
-    /**
-     * todo : 그룹 공지
-     */
     public static GroupAdminResponse of(CoGroup group) {
         return GroupAdminResponse.builder()
                 .groupId(group.getId())
@@ -37,6 +34,7 @@ public class GroupAdminResponse {
                 .groupManagers(group.getGroupManager().stream()
                         .map(GroupManagerResponse::of)
                         .collect(Collectors.toList()))
+                .groupNotice(group.getGroupNotice().getContents())
                 .build();
     }
 }

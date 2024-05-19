@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import project.coca.domain.personal.Member;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @Entity
 @ToString
 @NoArgsConstructor
+@EntityListeners(AuditingEntityListener.class)  // 감사 기능 활성화
 public class FriendRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +26,7 @@ public class FriendRequest {
     private RequestStatus requestStatus;
     @CreatedDate
     @Column(updatable = false, name = "CREATED_AT")
-    private LocalDateTime createdDate;
+    private LocalDateTime createdDate = LocalDateTime.now();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SENDER_ID", nullable = false)

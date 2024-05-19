@@ -12,4 +12,5 @@ public interface GroupManagerRepository extends JpaRepository<GroupManager, Long
 
     @Query("select gm from GroupManager gm where gm.groupManager.id = :memberId and gm.coGroup.id = :groupId")
     Optional<GroupManager> checkUserIsManager(String memberId, Long groupId);
+
 }
