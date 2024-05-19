@@ -45,11 +45,11 @@ public class Member {
     @OneToMany(mappedBy = "groupManager", cascade = CascadeType.ALL)
     private List<GroupManager> groupManagers = new ArrayList<>();
 
-    @OneToMany(mappedBy = "member1", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Friend> friends = new ArrayList<>();
 
-    @OneToMany(mappedBy = "member2", cascade = CascadeType.ALL)
-    private List<Friend> friends2 = new ArrayList<>();
+    @OneToMany(mappedBy = "opponent", cascade = CascadeType.ALL)
+    private List<Friend> friendOfOpponent = new ArrayList<>();
 
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
     private List<GroupRequest> groupRequestsAsSender = new ArrayList<>();

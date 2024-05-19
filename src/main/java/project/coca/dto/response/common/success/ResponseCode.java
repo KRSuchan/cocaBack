@@ -5,7 +5,8 @@ import lombok.Getter;
 @Getter
 public enum ResponseCode {
     OK(200, "OK"),
-    CREATED(201, "Created");
+    CREATED(201, "Created"),
+    ALREADY_REPORTED(208, "Already Reported");
 
     private final Integer code;
     private final String message;
