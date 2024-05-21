@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.oxm.ValidationFailureException;
 import org.springframework.web.bind.annotation.*;
 import project.coca.domain.group.CoGroup;
+import project.coca.domain.group.GroupMember;
 import project.coca.domain.group.GroupNotice;
 import project.coca.domain.personal.Member;
 import project.coca.domain.tag.GroupTag;
@@ -175,15 +176,13 @@ public class GroupController {
         CoGroup group = request.getGroup();
         List<GroupTag> groupTags = request.getGroupTags();
         GroupNotice notice = request.getNotice();
-        log.info("update group admin : {}", member);
-        log.info("update group: {}", group);
-        log.info("update group tags: {}", groupTags);
-        log.info("update group notice: {}", notice);
+        List<Member> membersToManager = request.getMembersToManager();
+        List<Member> managersToMember = request.getManagersToMember();
         if (groupTags.size() > 3) {
             return ApiResponse.fail(ErrorCode.BAD_REQUEST, "태그 수는 3개 이하이어야 합니다.");
         }
         try {
-            groupService.updateGroup(group.getId(), member.getId(), group, groupTags, notice);
+            groupService.updateGroup(member, group, groupTags, notice, membersToManager, managersToMember);
             return ApiResponse.success(ResponseCode.OK, "수정 완료");
         } catch (NoSuchElementException e) {
             return ApiResponse.fail(ErrorCode.NOT_FOUND, e.getMessage());
@@ -264,6 +263,29 @@ public class GroupController {
             return ApiResponse.fail(ErrorCode.NOT_FOUND, e.getMessage());
         } catch (ValidationFailureException e) {
             return ApiResponse.fail(ErrorCode.UNAUTHORIZED, e.getMessage());
+        } catch (Exception e) {
+            return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    /**
+     * a. 그룹 회원 목록 조회
+     *
+     * @return : 회원 id, 그룹 id
+     */
+    @GetMapping("/list/members/member/{memberId}/group/{groupId}")
+    public ApiResponse<List<GroupMemberResponse>> findGroupMember(@PathVariable String memberId, @PathVariable Long groupId) {
+        log.info("find group member memberId: {}", memberId);
+        log.info("find group member groupId: {}", groupId);
+        try {
+            List<GroupMember> members = groupService.findGroupMembers(memberId, groupId);
+            List<GroupMemberResponse> data = members
+                    .stream()
+                    .map(GroupMemberResponse::of)
+                    .collect(Collectors.toList());
+            return ApiResponse.response(ResponseCode.OK, data);
+        } catch (NoSuchElementException e) {
+            return ApiResponse.fail(ErrorCode.NOT_FOUND, e.getMessage());
         } catch (Exception e) {
             return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }

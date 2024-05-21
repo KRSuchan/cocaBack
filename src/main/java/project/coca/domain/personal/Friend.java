@@ -23,7 +23,7 @@ public class Friend {
     @JoinColumn(name = "MEMBER_ID", nullable = false)
     private Member member;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "OPPONENT_ID", nullable = false)
     private Member opponent;
 }

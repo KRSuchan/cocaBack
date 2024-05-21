@@ -39,16 +39,16 @@ public class Member {
     @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL)
     private List<CoGroup> coGroups = new ArrayList<>();
 
-    @OneToMany(mappedBy = "groupMember", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "groupMember", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<GroupMember> groupMembers = new ArrayList<>();
 
-    @OneToMany(mappedBy = "groupManager", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "groupManager", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<GroupManager> groupManagers = new ArrayList<>();
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Friend> friends = new ArrayList<>();
 
-    @OneToMany(mappedBy = "opponent", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "opponent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Friend> friendOfOpponent = new ArrayList<>();
 
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)

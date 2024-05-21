@@ -185,24 +185,49 @@ public class GroupService {
     /**
      * 25. 그룹 수정
      */
-    public void updateGroup(Long groupId,
-                            String adminId,
+    public void updateGroup(Member admin,
                             CoGroup updateGroup,
                             List<GroupTag> groupTags,
-                            GroupNotice notice) {
+                            GroupNotice notice,
+                            List<Member> membersToManager,
+                            List<Member> managersToMember) {
         // 1. 그룹 조회
-        CoGroup findGroup = groupRepository.findById(groupId)
+        CoGroup findGroup = groupRepository.findById(updateGroup.getId())
                 .orElseThrow(() -> new NoSuchElementException("그룹이 조회되지 않습니다."));
+        System.out.println("그룹조회완");
         // 2. admin 인가?
-        Member member = memberRepository.findById(adminId)
+        Member member = memberRepository.findById(admin.getId())
                 .orElseThrow(() -> new NoSuchElementException("회원이 조회되지 않습니다."));
+        System.out.println("admin 조회 완");
         if (!findGroup.getAdmin().equals(member)) {
             throw new ValidationFailureException("수정 권한이 없습니다.");
         }
+        System.out.println("수정 권한 확인 완");
         // 3. 조회된 그룹 수정
         findGroup.setName(updateGroup.getName());
         findGroup.setDescription(updateGroup.getDescription());
         findGroup.setGroupManager(updateGroup.getGroupManager());
+
+        // 일반회원에서 매니저로 변경
+        for (Member toManager : membersToManager) {
+            // 해당 회원이 이미 매니저인지 확인
+            boolean isManager = groupManagerRepository.existsByGroupManagerAndCoGroup(toManager, findGroup);
+            // 이미 매니저인 경우에는 제외
+            if (!isManager) {
+                GroupManager newManager = new GroupManager();
+                newManager.setCoGroup(findGroup);
+                newManager.setGroupManager(toManager);
+                groupManagerRepository.save(newManager);
+            }
+        }
+        System.out.println("일반회원에서 매니저로 변경 완");
+        // 매니저에서 일반회원으로 변경
+        for (Member toMember : managersToMember) {
+            if (!admin.getId().equals(toMember.getId())) {
+                groupManagerRepository.deleteByManagerIdAndGroupId(toMember.getId(), findGroup.getId());
+            }
+        }
+        System.out.println("매니저에서 일반회원으로 변경 완");
         // 4. 그룹 태그 모두 삭제 후 재세팅
         groupTagRepository.deleteAllByCoGroupId(findGroup.getId());
         for (GroupTag groupTag : groupTags) {
@@ -212,6 +237,7 @@ public class GroupService {
             groupTag.setTag(tag);
         }
         findGroup.setGroupTags(groupTags);
+        System.out.println("그룹 태그 모두 삭제 후 재세팅 완");
         // 5. 조회된 그룹의 공지 등록 / 수정 / 삭제
         GroupNotice existingNotice = findGroup.getGroupNotice();
         if (notice != null && notice.getContents() != null) {
@@ -233,6 +259,7 @@ public class GroupService {
                 findGroup.setGroupNotice(null);
             }
         }
+        System.out.println("조회된 그룹의 공지 등록 / 수정 / 삭제 완");
         // 6. 수정된 그룹 저장
         groupRepository.save(findGroup);
     }
@@ -284,5 +311,18 @@ public class GroupService {
             throw new ValidationFailureException("참가중이지 않습니다.");
         }
         return findGroup.getGroupNotice();
+    }
+
+    /**
+     * a. 그룹 회원 목록 조회
+     */
+    public List<GroupMember> findGroupMembers(String memberId, Long groupId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("회원이 조회되지 않습니다."));
+        CoGroup group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new NoSuchElementException("그룹이 조회되지 않습니다."));
+        groupMemberRepository.checkMemberInGroup(group.getId(), member.getId())
+                .orElseThrow(() -> new NoSuchElementException("그룹의 회원이 아닙니다."));
+        return groupMemberRepository.findAllByGroupMemberAndCoGroup(member, group);
     }
 }

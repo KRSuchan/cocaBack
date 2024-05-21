@@ -51,6 +51,4 @@ public class PersonalSchedule {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MEMBER_ID", nullable = false)
     private Member member;
-
-
 }

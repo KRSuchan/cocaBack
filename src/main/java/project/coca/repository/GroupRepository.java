@@ -14,6 +14,6 @@ public interface GroupRepository extends JpaRepository<CoGroup, Long> {
 
     @Query("SELECT g FROM CoGroup g JOIN g.groupMembers gm WHERE gm.groupMember.id = :groupMemberId")
     List<CoGroup> findByGroupMemberId(String groupMemberId);
-    
+
     Page<CoGroup> findByGroupTagsTagNameOrderByGroupMembersDesc(String tagName, Pageable pageable);
 }
