@@ -17,6 +17,6 @@ public interface GroupScheduleRepository extends JpaRepository<GroupSchedule, Lo
     boolean existsById(Long id);
 
     @Query("select s from GroupSchedule s where (s.coGroup.id = :groupId and s.startTime >= :startDate) and s.endTime <= :endDate order by s.startTime asc")
-    List<GroupSchedule> findGroupScheduleSummary(Long groupId, LocalDateTime startDate, LocalDateTime endDate);
+    List<GroupSchedule> findGroupSchedule(Long groupId, LocalDateTime startDate, LocalDateTime endDate);
 
 }

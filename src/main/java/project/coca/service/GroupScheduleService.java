@@ -2,21 +2,12 @@ package project.coca.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.codec.Hex;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import project.coca.domain.group.GroupManager;
-import project.coca.domain.group.GroupMember;
-import project.coca.domain.group.GroupSchedule;
-import project.coca.domain.group.GroupScheduleAttachment;
+import project.coca.domain.group.*;
 import project.coca.dto.request.GroupScheduleAttachmentRequest;
-import project.coca.dto.request.GroupScheduleUpdateRequest;
-import project.coca.dto.response.group.GroupScheduleResponse;
-import project.coca.dto.response.group.GroupScheduleSummaryResponse;
-import project.coca.repository.GroupManagerRepository;
-import project.coca.repository.GroupMemberRepository;
-import project.coca.repository.GroupScheduleAttachmentRepository;
-import project.coca.repository.GroupScheduleRepository;
+import project.coca.dto.request.GroupScheduleRequest;
+import project.coca.repository.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,8 +21,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 @Service
 @Transactional
@@ -45,6 +35,8 @@ public class GroupScheduleService {
     private final GroupManagerRepository groupManagerRepository;
     @Autowired
     private final GroupScheduleAttachmentRepository groupScheduleAttachmentRepository;
+    @Autowired
+    private final GroupRepository groupRepository;
 
     //파일의 md5 생성
     private String generateFileMd5(File newFile) throws NoSuchAlgorithmException, IOException {
@@ -83,16 +75,51 @@ public class GroupScheduleService {
         LocalDateTime startDate = startDay.atStartOfDay();
         LocalDateTime endDate = endDay.atTime(LocalTime.of(23, 59, 59));
 
-        return groupScheduleRepository.findGroupScheduleSummary(groupId, startDate, endDate);
+        return groupScheduleRepository.findGroupSchedule(groupId, startDate, endDate);
     }
 
-    public void groupScheduleUpdate(GroupScheduleUpdateRequest requestSchedule)
+    /* 그룹 일정 등록
+    그룹이 존재하는지 확인 & 신청한 멤버가 관리자인지 확인 -> 등록
+    파일 저장하는 로직 추가 필요
+     */
+    public GroupSchedule groupScheduleRegistrationReq(GroupScheduleRequest requestSchedule) throws NoSuchAlgorithmException, IOException
+    {
+        CoGroup group = groupRepository.findById(requestSchedule.getGroupId())
+                .orElseThrow(() -> new NoSuchElementException("그룹이 존재하지 않습니다."));
+
+        GroupManager checkUser = groupManagerRepository.checkUserIsManager(requestSchedule.getMemberId(), requestSchedule.getGroupId())
+                .orElseThrow(() -> new NoSuchElementException("해당 그룹의 관리자가 아닙니다."));
+
+        GroupSchedule registSchedule = new GroupSchedule();
+
+        registSchedule.setCoGroup(group);
+        registSchedule.setTitle(requestSchedule.getTitle());
+        registSchedule.setDescription(requestSchedule.getDescription());
+        registSchedule.setLocation(requestSchedule.getLocation());
+        registSchedule.setStartTime(requestSchedule.getStartTime());
+        registSchedule.setEndTime(requestSchedule.getEndTime());
+        registSchedule.setColor(requestSchedule.getColor());
+
+        List<GroupScheduleAttachment> attachments = new ArrayList<>();
+        for(GroupScheduleAttachmentRequest attachment : requestSchedule.getAttachments())
+            attachments.add(generateAttachment(attachment, registSchedule));
+
+        registSchedule.setGroupScheduleAttachments(attachments);
+
+        return groupScheduleRepository.save(registSchedule);
+    }
+
+    /* 그룹 일정 수정
+    일정이 존재하는지 확인 & 신청한 멤버가 관리자인지 확인 -> 등록
+    파일 저장하는 로직 추가 필요
+     */
+    public GroupSchedule groupScheduleUpdate(GroupScheduleRequest requestSchedule, Long scheduleId)
             throws NoSuchAlgorithmException, IOException
     {
         GroupManager checkUser = groupManagerRepository.checkUserIsManager(requestSchedule.getMemberId(), requestSchedule.getGroupId())
                 .orElseThrow(() -> new NoSuchElementException("해당 그룹의 관리자가 아닙니다."));
 
-        GroupSchedule updateSchedule = groupScheduleRepository.findById(requestSchedule.getScheduleId())
+        GroupSchedule updateSchedule = groupScheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new NoSuchElementException("일정이 조회되지 않습니다."));
 
         updateSchedule.setTitle(requestSchedule.getTitle());
@@ -130,6 +157,7 @@ public class GroupScheduleService {
             }
         }
 
+        return groupScheduleRepository.save(updateSchedule);
     }
 
     /* 그룹 일정 삭제
@@ -146,6 +174,7 @@ public class GroupScheduleService {
         GroupSchedule deleteSchedule = groupScheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new NoSuchElementException("일정이 조회되지 않습니다."));
 
+        groupScheduleAttachmentRepository.deleteAll(deleteSchedule.getGroupScheduleAttachments());
 
         groupScheduleRepository.delete(deleteSchedule);
         groupScheduleRepository.flush();

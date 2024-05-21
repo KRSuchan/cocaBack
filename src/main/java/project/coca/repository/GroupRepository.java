@@ -7,8 +7,11 @@ import org.springframework.data.jpa.repository.Query;
 import project.coca.domain.group.CoGroup;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface GroupRepository extends JpaRepository<CoGroup, Long> {
+    Optional<CoGroup> findById(Long groupId);
+
     // 그룹 멤버 수를 기준으로 오름차순으로 페이징 및 정렬된 결과를 반환하는 메서드
     Page<CoGroup> findByNameContainingOrderByGroupMembersDesc(String name, Pageable pageable);
 
