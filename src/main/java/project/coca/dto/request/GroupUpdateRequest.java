@@ -19,4 +19,6 @@ public class GroupUpdateRequest {
     private List<GroupTag> groupTags;
     private List<GroupManager> managers;
     private GroupNotice notice;
+    private List<Member> membersToManager;
+    private List<Member> managersToMember;
 }
