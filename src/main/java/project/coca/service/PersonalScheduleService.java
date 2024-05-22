@@ -55,9 +55,11 @@ public class PersonalScheduleService {
         PersonalSchedule savedSchedule = personalScheduleRepository.save(personalSchedule);
 
         // 새로운 첨부 파일 추가
-        for (MultipartFile attachment : attachments) {
-            if (attachment != null && !attachment.isEmpty()) {
-                saveAttachment(member, savedSchedule, attachment);
+        if (attachments != null && attachments.length > 0) { // null 체크 추가
+            for (MultipartFile attachment : attachments) {
+                if (attachment != null && !attachment.isEmpty()) { // 논리 AND 조건으로 수정
+                    saveAttachment(member, savedSchedule, attachment);
+                }
             }
         }
 
@@ -113,9 +115,11 @@ public class PersonalScheduleService {
         personalScheduleAttachmentRepository.deleteAllByPersonalSchedule(foundPersonalSchedule);
 
         // 새로운 첨부 파일 추가
-        for (MultipartFile attachment : attachments) {
-            if (attachment != null && !attachment.isEmpty()) {
-                saveAttachment(member, foundPersonalSchedule, attachment);
+        if (attachments != null && attachments.length > 0) { // null 체크 추가
+            for (MultipartFile attachment : attachments) {
+                if (attachment != null && !attachment.isEmpty()) { // 논리 AND 조건으로 수정
+                    saveAttachment(member, foundPersonalSchedule, attachment);
+                }
             }
         }
 

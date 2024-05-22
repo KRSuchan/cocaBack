@@ -42,7 +42,6 @@ public class PersonalScheduleController {
         Member member = request.getMember();
         log.info("Add personal schedule member: {}", member);
         log.info("Add personal schedule: {}", personalSchedule);
-        log.info("Add personal schedule attachment: {}", attachments[0].getName());
         System.out.println(member.getId());
         try {
             PersonalSchedule savedSchedule = personalScheduleService.savePersonalSchedule(member, personalSchedule, attachments);
@@ -136,7 +135,6 @@ public class PersonalScheduleController {
         Member member = request.getMember();
         log.info("Update personal schedule member: {}", member);
         log.info("Update personal schedule: {}", personalSchedule);
-        log.info("Update personal schedule attachment: {}", attachments[0].getOriginalFilename());
         try {
             PersonalSchedule savedSchedule = personalScheduleService.updatePersonalSchedule(member, personalSchedule, attachments);
             PersonalScheduleResponse data = PersonalScheduleResponse.of(savedSchedule);
