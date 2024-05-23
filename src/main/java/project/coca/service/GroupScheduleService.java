@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import project.coca.domain.group.*;
 import project.coca.dto.request.GroupScheduleAttachmentRequest;
 import project.coca.dto.request.GroupScheduleRequest;
@@ -48,14 +49,14 @@ public class GroupScheduleService {
     }
 
     private GroupScheduleAttachment generateAttachment(
-            GroupScheduleAttachmentRequest attach, GroupSchedule schedule)
+            MultipartFile file, GroupSchedule schedule)
             throws NoSuchAlgorithmException, IOException
     {
         GroupScheduleAttachment changeAttach = new GroupScheduleAttachment();
 
-        changeAttach.setFileName(attach.getFileName());
+        changeAttach.setFileName(file.getOriginalFilename());
         changeAttach.setFilePath("aws에 올리는 로직 추가 후 변경");
-        changeAttach.setFileMd5(generateFileMd5(attach.getFile()));
+        changeAttach.setFileMd5(generateFileMd5(file.getResource().getFile()));
         changeAttach.setGroupSchedule(schedule);
 
         return changeAttach;
@@ -82,7 +83,7 @@ public class GroupScheduleService {
     그룹이 존재하는지 확인 & 신청한 멤버가 관리자인지 확인 -> 등록
     파일 저장하는 로직 추가 필요
      */
-    public GroupSchedule groupScheduleRegistrationReq(GroupScheduleRequest requestSchedule) throws NoSuchAlgorithmException, IOException
+    public GroupSchedule groupScheduleRegistrationReq(GroupScheduleRequest requestSchedule, MultipartFile[] files) throws NoSuchAlgorithmException, IOException
     {
         CoGroup group = groupRepository.findById(requestSchedule.getGroupId())
                 .orElseThrow(() -> new NoSuchElementException("그룹이 존재하지 않습니다."));
@@ -101,8 +102,9 @@ public class GroupScheduleService {
         registSchedule.setColor(requestSchedule.getColor());
 
         List<GroupScheduleAttachment> attachments = new ArrayList<>();
-        for(GroupScheduleAttachmentRequest attachment : requestSchedule.getAttachments())
-            attachments.add(generateAttachment(attachment, registSchedule));
+        if(files != null || files.length > 0)
+            for(MultipartFile file : files)
+                attachments.add(generateAttachment(file, registSchedule));
 
         registSchedule.setGroupScheduleAttachments(attachments);
 
@@ -113,7 +115,7 @@ public class GroupScheduleService {
     일정이 존재하는지 확인 & 신청한 멤버가 관리자인지 확인 -> 등록
     파일 저장하는 로직 추가 필요
      */
-    public GroupSchedule groupScheduleUpdate(GroupScheduleRequest requestSchedule, Long scheduleId)
+    public GroupSchedule groupScheduleUpdate(GroupScheduleRequest requestSchedule, MultipartFile[] files, Long scheduleId)
             throws NoSuchAlgorithmException, IOException
     {
         GroupManager checkUser = groupManagerRepository.checkUserIsManager(requestSchedule.getMemberId(), requestSchedule.getGroupId())
@@ -134,8 +136,8 @@ public class GroupScheduleService {
             existAttachMD5s.add(attachment.getFileMd5());
 
         List<String> newAttachMD5s = new ArrayList<>();
-        for(GroupScheduleAttachmentRequest attachment : requestSchedule.getAttachments())
-            newAttachMD5s.add(generateFileMd5(attachment.getFile()));
+        for(MultipartFile file : files)
+            newAttachMD5s.add(generateFileMd5(file.getResource().getFile()));
 
         //복사해서 바꿔야 오류가 안납니다...
         List<GroupScheduleAttachment> attachmentsCopy = new ArrayList<>(updateSchedule.getGroupScheduleAttachments());
@@ -151,7 +153,7 @@ public class GroupScheduleService {
         //기존거에 없음 -> 기존거에 새로운거 추가
         for(int i = 0; i < newAttachMD5s.size(); i++) {
             if(!existAttachMD5s.contains(newAttachMD5s.get(i))) {
-                GroupScheduleAttachment newAttach = generateAttachment(requestSchedule.getAttachments().get(i), updateSchedule);
+                GroupScheduleAttachment newAttach = generateAttachment(files[i], updateSchedule);
                 groupScheduleAttachmentRepository.save(newAttach);
                 updateSchedule.addAttachment(newAttach);
             }
