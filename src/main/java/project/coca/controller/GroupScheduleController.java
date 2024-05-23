@@ -59,11 +59,12 @@ public class GroupScheduleController {
      * @return ApiResponse
      */
     @GetMapping("/groupScheduleSpecificReq")
-    public ApiResponse<List<GroupSchedule>> groupScheduleSpecificReq(
+    public ApiResponse<List<GroupScheduleResponse>> groupScheduleSpecificReq(
             @RequestParam Long groupId, @RequestParam String memberId, @RequestParam LocalDate inquiryDate)
     {
         try {
-            List<GroupSchedule> groupScheduleList = groupScheduleService.groupScheduleInquiry(groupId, memberId, inquiryDate, inquiryDate);
+            List<GroupScheduleResponse> groupScheduleList = groupScheduleService.groupScheduleInquiry(groupId, memberId, inquiryDate, inquiryDate).stream()
+                    .map(GroupScheduleResponse::of).collect(Collectors.toList());
 
             return ApiResponse.response(ResponseCode.OK, groupScheduleList);
         } catch (NoSuchElementException e) {
