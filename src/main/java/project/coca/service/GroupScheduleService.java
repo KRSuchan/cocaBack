@@ -102,7 +102,7 @@ public class GroupScheduleService {
         registSchedule.setColor(requestSchedule.getColor());
 
         List<GroupScheduleAttachment> attachments = new ArrayList<>();
-        if(files != null || files.length > 0)
+        if(files != null && files.length > 0)
             for(MultipartFile file : files)
                 attachments.add(generateAttachment(file, registSchedule));
 
