@@ -115,13 +115,13 @@ public class GroupScheduleService {
     일정이 존재하는지 확인 & 신청한 멤버가 관리자인지 확인 -> 등록
     파일 저장하는 로직 추가 필요
      */
-    public GroupSchedule groupScheduleUpdate(GroupScheduleRequest requestSchedule, MultipartFile[] files, Long scheduleId)
+    public GroupSchedule groupScheduleUpdate(GroupScheduleRequest requestSchedule, MultipartFile[] files)
             throws NoSuchAlgorithmException, IOException
     {
         GroupManager checkUser = groupManagerRepository.checkUserIsManager(requestSchedule.getMemberId(), requestSchedule.getGroupId())
                 .orElseThrow(() -> new NoSuchElementException("해당 그룹의 관리자가 아닙니다."));
 
-        GroupSchedule updateSchedule = groupScheduleRepository.findById(scheduleId)
+        GroupSchedule updateSchedule = groupScheduleRepository.findById(requestSchedule.getScheduleId())
                 .orElseThrow(() -> new NoSuchElementException("일정이 조회되지 않습니다."));
 
         updateSchedule.setTitle(requestSchedule.getTitle());
@@ -185,6 +185,10 @@ public class GroupScheduleService {
             return false;
         else
             return true;
+    }
+
+    public void getGroupScheduleToPersonalSchedule(Long groupId, Long scheduleId, String memberId) {
+
     }
 
 }

@@ -104,11 +104,10 @@ public class GroupScheduleController {
     @PostMapping(value = "/groupScheduleUpdateReq", consumes = "multipart/form-data")
     public ApiResponse<GroupScheduleResponse> groupScheduleUpdateReq(
             @RequestPart("scheduleData") GroupScheduleRequest requestSchedule,
-            @RequestPart(value = "scheduleFiles", required = false) MultipartFile[] files,
-            @RequestPart("scheduleId") Long scheduleId)
+            @RequestPart(value = "scheduleFiles", required = false) MultipartFile[] files)
     {
         try {
-            GroupScheduleResponse updateGroupSchedule = GroupScheduleResponse.of(groupScheduleService.groupScheduleUpdate(requestSchedule, files, scheduleId));
+            GroupScheduleResponse updateGroupSchedule = GroupScheduleResponse.of(groupScheduleService.groupScheduleUpdate(requestSchedule, files));
 
             return ApiResponse.response(ResponseCode.OK, updateGroupSchedule);
         } catch (NoSuchAlgorithmException e) {
