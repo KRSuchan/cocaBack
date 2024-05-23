@@ -2,11 +2,13 @@ package project.coca.controller;
 
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import project.coca.domain.group.GroupSchedule;
 import project.coca.dto.request.GroupScheduleRequest;
 import project.coca.dto.response.common.ApiResponse;
 import project.coca.dto.response.common.error.ErrorCode;
 import project.coca.dto.response.common.success.ResponseCode;
+import project.coca.dto.response.group.GroupScheduleResponse;
 import project.coca.dto.response.group.GroupScheduleSummaryResponse;
 import project.coca.service.GroupScheduleService;
 
@@ -77,10 +79,13 @@ public class GroupScheduleController {
      * @body requestSchedule
      * @return ApiResponse
      */
-    @PostMapping("/groupScheduleRegistrationReq")
-    public ApiResponse<GroupSchedule> groupScheduleRegistrationReq(@RequestBody GroupScheduleRequest requestSchedule) {
+    @PostMapping(value = "/groupScheduleRegistrationReq", consumes = "multipart/form-data")
+    public ApiResponse<GroupScheduleResponse> groupScheduleRegistrationReq(
+            @RequestPart("scheduleData") GroupScheduleRequest requestSchedule,
+            @RequestPart(value = "scheduleFiles", required = false) MultipartFile[] files)
+    {
         try {
-            GroupSchedule registGroupSchedule = groupScheduleService.groupScheduleRegistrationReq(requestSchedule);
+            GroupScheduleResponse registGroupSchedule = GroupScheduleResponse.of(groupScheduleService.groupScheduleRegistrationReq(requestSchedule, files));
 
             return ApiResponse.response(ResponseCode.OK, registGroupSchedule);
         } catch (NoSuchAlgorithmException e) {
@@ -95,10 +100,14 @@ public class GroupScheduleController {
      * @body requestSchedule, scheduleId
      * @return ApiResponse
      */
-    @PostMapping("/groupScheduleUpdateReq")
-    public ApiResponse<GroupSchedule> groupScheduleUpdateReq(@RequestBody GroupScheduleRequest requestSchedule, @RequestBody Long scheduleId) {
+    @PostMapping(value = "/groupScheduleUpdateReq", consumes = "multipart/form-data")
+    public ApiResponse<GroupScheduleResponse> groupScheduleUpdateReq(
+            @RequestPart("scheduleData") GroupScheduleRequest requestSchedule,
+            @RequestPart(value = "scheduleFiles", required = false) MultipartFile[] files,
+            @RequestPart("scheduleId") Long scheduleId)
+    {
         try {
-            GroupSchedule updateGroupSchedule = groupScheduleService.groupScheduleUpdate(requestSchedule, scheduleId);
+            GroupScheduleResponse updateGroupSchedule = GroupScheduleResponse.of(groupScheduleService.groupScheduleUpdate(requestSchedule, files, scheduleId));
 
             return ApiResponse.response(ResponseCode.OK, updateGroupSchedule);
         } catch (NoSuchAlgorithmException e) {
