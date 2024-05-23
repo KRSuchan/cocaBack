@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 @Setter
 public class GroupScheduleResponse {
     private Long groupId;
+    private Long scheduleId;
     private String title;
     private String description;
     private String location;
@@ -32,6 +33,7 @@ public class GroupScheduleResponse {
     public static GroupScheduleResponse of(GroupSchedule schedule) {
         return GroupScheduleResponse.builder()
                 .groupId(schedule.getCoGroup().getId())
+                .scheduleId(schedule.getId())
                 .title(schedule.getTitle())
                 .description(schedule.getDescription())
                 .location(schedule.getLocation())
