@@ -10,6 +10,7 @@ import project.coca.dto.response.common.error.ErrorCode;
 import project.coca.dto.response.common.success.ResponseCode;
 import project.coca.dto.response.group.GroupScheduleResponse;
 import project.coca.dto.response.group.GroupScheduleSummaryResponse;
+import project.coca.dto.response.personalSchedule.PersonalScheduleResponse;
 import project.coca.service.GroupScheduleService;
 
 import java.security.NoSuchAlgorithmException;
@@ -136,4 +137,25 @@ public class GroupScheduleController {
             return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
+
+    /**
+     * 개인 일정으로 저장하기(하트 기능)
+     * @param groupId  조회 할 그룹 id
+     * @param scheduleId  저장 할 스케쥴 id
+     * @param memberId 회원 개인 id
+     * @return ApiResponse
+     */
+    @GetMapping("/setGroupScheduleToPersonalScheduleReq")
+    public ApiResponse<PersonalScheduleResponse> setGroupScheduleToPersonalScheduleReq(
+            @RequestParam Long groupId, @RequestParam Long scheduleId, @RequestParam String memberId)
+    {
+        try {
+            PersonalScheduleResponse result = PersonalScheduleResponse.of(groupScheduleService.setGroupScheduleToPersonalSchedule(groupId, scheduleId, memberId));
+
+            return ApiResponse.response(ResponseCode.OK, result);
+        } catch (Exception e) {
+            return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
 }
