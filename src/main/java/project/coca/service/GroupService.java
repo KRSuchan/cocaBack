@@ -274,11 +274,8 @@ public class GroupService {
         // 2. 그룹 조회
         CoGroup findGroup = groupRepository.findById(group.getId())
                 .orElseThrow(() -> new NoSuchElementException("그룹이 조회되지 않습니다."));
-        // 3. 권한 검증 / admin 인가 / 최종 : 그룹 리턴
-        if (!findMember.getPassword().equals(admin.getPassword())) {
-            // 회원 pwd 불일치
-            throw new NoSuchElementException("회원이 조회되지 않습니다.");
-        } else if (!findGroup.getAdmin().getId().equals(admin.getId())) {
+        // 3. 권한 검증 / 최종 : 그룹 리턴
+        if (!findGroup.getAdmin().getId().equals(admin.getId())) {
             // admin id 불일치
             throw new ValidationFailureException("조회 권한이 없습니다.");
         } else {
