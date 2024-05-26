@@ -34,7 +34,7 @@ public class GroupAdminResponse {
                 .groupManagers(group.getGroupManager().stream()
                         .map(GroupManagerResponse::of)
                         .collect(Collectors.toList()))
-                .groupNotice(group.getGroupNotice().getContents())
+                .groupNotice(group.getGroupNotice() == null ? null : group.getGroupNotice().getContents())
                 .build();
     }
 }
