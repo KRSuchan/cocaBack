@@ -11,7 +11,7 @@ public class GroupNoticeResponse {
 
     public static GroupNoticeResponse of(GroupNotice notice) {
         return GroupNoticeResponse.builder()
-                .contents(notice == null ? null : notice.getContents())
+                .contents(notice == null || notice.getContents() == null ? null : notice.getContents())
                 .build();
     }
 }
