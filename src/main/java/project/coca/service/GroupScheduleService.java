@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import project.coca.domain.group.*;
+import project.coca.domain.personal.Member;
+import project.coca.domain.personal.PersonalSchedule;
+import project.coca.domain.personal.PersonalScheduleAttachment;
 import project.coca.dto.request.GroupScheduleAttachmentRequest;
 import project.coca.dto.request.GroupScheduleRequest;
 import project.coca.repository.*;
@@ -38,11 +41,15 @@ public class GroupScheduleService {
     private final GroupScheduleAttachmentRepository groupScheduleAttachmentRepository;
     @Autowired
     private final GroupRepository groupRepository;
+    @Autowired
+    private final MemberRepository memberRepository;
+    @Autowired
+    private final PersonalScheduleRepository personalScheduleRepository;
 
     //파일의 md5 생성
-    private String generateFileMd5(File newFile) throws NoSuchAlgorithmException, IOException {
+    private String generateFileMd5(File file) throws NoSuchAlgorithmException, IOException {
         MessageDigest md = MessageDigest.getInstance("MD5");
-        md.update(Files.readAllBytes(newFile.toPath()));
+        md.update(Files.readAllBytes(file.toPath()));
         byte[] hash = md.digest();
 
         return new BigInteger(1, hash).toString(16);
@@ -132,30 +139,38 @@ public class GroupScheduleService {
         updateSchedule.setColor(requestSchedule.getColor());
 
         List<String> existAttachMD5s = new ArrayList<>();
-        for(GroupScheduleAttachment attachment : updateSchedule.getGroupScheduleAttachments())
-            existAttachMD5s.add(attachment.getFileMd5());
+        if(!updateSchedule.getGroupScheduleAttachments().isEmpty() && updateSchedule.getGroupScheduleAttachments().size() > 0) {
+            for(GroupScheduleAttachment attachment : updateSchedule.getGroupScheduleAttachments())
+                existAttachMD5s.add(attachment.getFileMd5());
+        }
 
         List<String> newAttachMD5s = new ArrayList<>();
-        for(MultipartFile file : files)
-            newAttachMD5s.add(generateFileMd5(file.getResource().getFile()));
+        if(files.length > 0 && files != null) {
+            for(MultipartFile file : files)
+                newAttachMD5s.add(generateFileMd5(file.getResource().getFile()));
+        }
 
         //복사해서 바꿔야 오류가 안납니다...
         List<GroupScheduleAttachment> attachmentsCopy = new ArrayList<>(updateSchedule.getGroupScheduleAttachments());
 
         //새로운거에 없음 -> 기존 DB에서 삭제
-        for(GroupScheduleAttachment attachment : attachmentsCopy) {
-            if(!newAttachMD5s.contains(attachment.getFileMd5())) {
-                groupScheduleAttachmentRepository.delete(attachment);
-                updateSchedule.removeAttachment(attachment);
+        if(!attachmentsCopy.isEmpty() && attachmentsCopy.size() > 0) {
+            for(GroupScheduleAttachment attachment : attachmentsCopy) {
+                if(!newAttachMD5s.contains(attachment.getFileMd5())) {
+                    groupScheduleAttachmentRepository.delete(attachment);
+                    updateSchedule.removeAttachment(attachment);
+                }
             }
         }
 
         //기존거에 없음 -> 기존거에 새로운거 추가
-        for(int i = 0; i < newAttachMD5s.size(); i++) {
-            if(!existAttachMD5s.contains(newAttachMD5s.get(i))) {
-                GroupScheduleAttachment newAttach = generateAttachment(files[i], updateSchedule);
-                groupScheduleAttachmentRepository.save(newAttach);
-                updateSchedule.addAttachment(newAttach);
+        if(!newAttachMD5s.isEmpty() && newAttachMD5s.size() > 0) {
+            for(int i = 0; i < newAttachMD5s.size(); i++) {
+                if(!existAttachMD5s.contains(newAttachMD5s.get(i))) {
+                    GroupScheduleAttachment newAttach = generateAttachment(files[i], updateSchedule);
+                    groupScheduleAttachmentRepository.save(newAttach);
+                    updateSchedule.addAttachment(newAttach);
+                }
             }
         }
 
@@ -187,8 +202,42 @@ public class GroupScheduleService {
             return true;
     }
 
-    public void getGroupScheduleToPersonalSchedule(Long groupId, Long scheduleId, String memberId) {
+    public PersonalSchedule setGroupScheduleToPersonalSchedule(Long groupId, Long scheduleId, String memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("회원이 존재하지 않습니다."));
 
+        GroupMember checkMember = groupMemberRepository.checkMemberInGroup(groupId, memberId)
+                .orElseThrow(() -> new NoSuchElementException("회원이 그룹에 속해있지 않습니다."));
+
+        GroupSchedule groupSchedule = groupScheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new NoSuchElementException("일정이 조회되지 않습니다."));
+
+        PersonalSchedule personalSchedule = new PersonalSchedule();
+
+        personalSchedule.setMember(member);
+        personalSchedule.setTitle(groupSchedule.getTitle());
+        personalSchedule.setDescription(groupSchedule.getDescription());
+        personalSchedule.setLocation(groupSchedule.getLocation());
+        personalSchedule.setStartTime(groupSchedule.getStartTime());
+        personalSchedule.setEndTime(groupSchedule.getEndTime());
+        personalSchedule.setColor(groupSchedule.getColor());
+        personalSchedule.setIsPrivate(false);
+
+        List<PersonalScheduleAttachment> attachments = new ArrayList<>();
+
+        if(groupSchedule.getGroupScheduleAttachments() != null && groupSchedule.getGroupScheduleAttachments().size() > 0) {
+            for(GroupScheduleAttachment attachment : groupSchedule.getGroupScheduleAttachments()) {
+                PersonalScheduleAttachment newAttachment = new PersonalScheduleAttachment();
+                newAttachment.setFilePath(attachment.getFilePath());
+                newAttachment.setFileName(attachment.getFileName());
+                newAttachment.setPersonalSchedule(personalSchedule);
+
+                attachments.add(newAttachment);
+            }
+        }
+
+        personalSchedule.setAttachments(attachments);
+        return personalScheduleRepository.save(personalSchedule);
     }
 
 }
