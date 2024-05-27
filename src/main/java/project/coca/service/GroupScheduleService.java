@@ -139,13 +139,13 @@ public class GroupScheduleService {
         updateSchedule.setColor(requestSchedule.getColor());
 
         List<String> existAttachMD5s = new ArrayList<>();
-        if(!updateSchedule.getGroupScheduleAttachments().isEmpty() && updateSchedule.getGroupScheduleAttachments().size() > 0) {
+        if(updateSchedule.getGroupScheduleAttachments() != null && updateSchedule.getGroupScheduleAttachments().size() > 0) {
             for(GroupScheduleAttachment attachment : updateSchedule.getGroupScheduleAttachments())
                 existAttachMD5s.add(attachment.getFileMd5());
         }
 
         List<String> newAttachMD5s = new ArrayList<>();
-        if(files.length > 0 && files != null) {
+        if(files != null && files.length > 0) {
             for(MultipartFile file : files)
                 newAttachMD5s.add(generateFileMd5(file.getResource().getFile()));
         }
@@ -154,7 +154,7 @@ public class GroupScheduleService {
         List<GroupScheduleAttachment> attachmentsCopy = new ArrayList<>(updateSchedule.getGroupScheduleAttachments());
 
         //새로운거에 없음 -> 기존 DB에서 삭제
-        if(!attachmentsCopy.isEmpty() && attachmentsCopy.size() > 0) {
+        if(attachmentsCopy != null && attachmentsCopy.size() > 0) {
             for(GroupScheduleAttachment attachment : attachmentsCopy) {
                 if(!newAttachMD5s.contains(attachment.getFileMd5())) {
                     groupScheduleAttachmentRepository.delete(attachment);
@@ -164,7 +164,7 @@ public class GroupScheduleService {
         }
 
         //기존거에 없음 -> 기존거에 새로운거 추가
-        if(!newAttachMD5s.isEmpty() && newAttachMD5s.size() > 0) {
+        if(newAttachMD5s != null && newAttachMD5s.size() > 0) {
             for(int i = 0; i < newAttachMD5s.size(); i++) {
                 if(!existAttachMD5s.contains(newAttachMD5s.get(i))) {
                     GroupScheduleAttachment newAttach = generateAttachment(files[i], updateSchedule);
@@ -202,6 +202,9 @@ public class GroupScheduleService {
             return true;
     }
 
+    /* 내 일정으로 가져오기(하트 버튼)
+     멤버가 그룹 내의 회원인지 확인 -> 그룹의 일정을 멤버 개인 캘린더에 저장
+    */
     public PersonalSchedule setGroupScheduleToPersonalSchedule(Long groupId, Long scheduleId, String memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("회원이 존재하지 않습니다."));

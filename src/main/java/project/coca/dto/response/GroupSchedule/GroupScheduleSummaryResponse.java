@@ -1,4 +1,4 @@
-package project.coca.dto.response.group;
+package project.coca.dto.response.GroupSchedule;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;

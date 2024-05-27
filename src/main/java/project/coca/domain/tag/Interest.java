@@ -25,4 +25,9 @@ public class Interest {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TAG_ID", nullable = false)
     private Tag tag;
+
+    public Interest(Member member, Tag tag) {
+        this.member = member;
+        this.tag = tag;
+    }
 }
