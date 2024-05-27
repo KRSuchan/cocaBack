@@ -42,7 +42,6 @@ public class PersonalScheduleController {
         Member member = request.getMember();
         log.info("Add personal schedule member: {}", member);
         log.info("Add personal schedule: {}", personalSchedule);
-        System.out.println(member.getId());
         try {
             PersonalSchedule savedSchedule = personalScheduleService.savePersonalSchedule(member, personalSchedule, attachments);
             PersonalScheduleResponse data = PersonalScheduleResponse.of(savedSchedule);

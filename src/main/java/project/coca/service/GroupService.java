@@ -18,6 +18,7 @@ import project.coca.dto.response.common.error.AlreadyReportedException;
 import project.coca.dto.response.group.GroupDetailSearchResponse;
 import project.coca.repository.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -166,12 +167,12 @@ public class GroupService {
     public List<CoGroup> findGroupsByTag(String tagName, Integer pageNumber) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         try {
-            Tag tag = tagRepository.findByName(tagName).orElseThrow();
+            Tag tag = tagRepository.findByName(tagName).orElseThrow(() -> new NoSuchElementException("태그가 조회되지 않습니다."));
             Page<CoGroup> resultPage = groupRepository
                     .findByGroupTagsTagNameOrderByGroupMembersDesc(tag.getName(), pageable);
             return resultPage.getContent();
         } catch (NoSuchElementException e) {
-            return null;
+            return Collections.emptyList();
         }
     }
 
