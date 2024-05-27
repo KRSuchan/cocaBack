@@ -165,10 +165,14 @@ public class GroupService {
      */
     public List<CoGroup> findGroupsByTag(String tagName, Integer pageNumber) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Tag tag = tagRepository.findByName(tagName);
-        Page<CoGroup> resultPage = groupRepository
-                .findByGroupTagsTagNameOrderByGroupMembersDesc(tag.getName(), pageable);
-        return resultPage.getContent();
+        try {
+            Tag tag = tagRepository.findByName(tagName).orElseThrow();
+            Page<CoGroup> resultPage = groupRepository
+                    .findByGroupTagsTagNameOrderByGroupMembersDesc(tag.getName(), pageable);
+            return resultPage.getContent();
+        } catch (NoSuchElementException e) {
+            return null;
+        }
     }
 
     /**
