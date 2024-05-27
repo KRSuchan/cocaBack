@@ -1,15 +1,12 @@
-package project.coca.dto.response.group;
+package project.coca.dto.response.GroupSchedule;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import project.coca.domain.group.GroupSchedule;
-import project.coca.domain.group.GroupScheduleAttachment;
-import project.coca.domain.group.GroupScheduleHeart;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 

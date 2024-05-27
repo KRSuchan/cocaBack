@@ -3,13 +3,12 @@ package project.coca.controller;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import project.coca.domain.group.GroupSchedule;
 import project.coca.dto.request.GroupScheduleRequest;
 import project.coca.dto.response.common.ApiResponse;
 import project.coca.dto.response.common.error.ErrorCode;
 import project.coca.dto.response.common.success.ResponseCode;
-import project.coca.dto.response.group.GroupScheduleResponse;
-import project.coca.dto.response.group.GroupScheduleSummaryResponse;
+import project.coca.dto.response.GroupSchedule.GroupScheduleResponse;
+import project.coca.dto.response.GroupSchedule.GroupScheduleSummaryResponse;
 import project.coca.dto.response.personalSchedule.PersonalScheduleResponse;
 import project.coca.service.GroupScheduleService;
 
