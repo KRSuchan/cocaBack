@@ -63,8 +63,8 @@ public class GroupScheduleController {
             @RequestParam Long groupId, @RequestParam String memberId, @RequestParam LocalDate inquiryDate)
     {
         try {
-            List<GroupScheduleResponse> groupScheduleList = groupScheduleService.groupScheduleInquiry(groupId, memberId, inquiryDate, inquiryDate).stream()
-                    .map(GroupScheduleResponse::of).collect(Collectors.toList());
+            List<GroupScheduleResponse> groupScheduleList = groupScheduleService.groupScheduleInquiry(groupId, memberId, inquiryDate, inquiryDate)
+                    .stream().map(GroupScheduleResponse::of).collect(Collectors.toList());
 
             return ApiResponse.response(ResponseCode.OK, groupScheduleList);
         } catch (NoSuchElementException e) {
@@ -152,6 +152,33 @@ public class GroupScheduleController {
             PersonalScheduleResponse result = PersonalScheduleResponse.of(groupScheduleService.setGroupScheduleToPersonalSchedule(groupId, scheduleId, memberId));
 
             return ApiResponse.response(ResponseCode.OK, result);
+        } catch (NoSuchElementException e) {
+            // RequestParam 데이터로 검색되지 않은 데이터가 존재할 경우
+            return ApiResponse.fail(ErrorCode.NOT_FOUND, "조회되지 않는 데이터가 포함되어 있습니다.");
+        } catch (Exception e) {
+            return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    /**
+     * 개인 일정 가져오기
+     * @param groupId  조회 할 그룹 id
+     * @param memberId 회원 개인 id
+     * @param date  선택한 날짜
+     * @return ApiResponse
+     */
+    @GetMapping("/setPersonalScheduleToGroupScheduleReq")
+    public ApiResponse<List<GroupScheduleResponse>> setPersonalScheduleToGroupScheduleReq(
+            @RequestParam Long groupId, @RequestParam String memberId, @RequestParam LocalDate date)
+    {
+        try {
+            List<GroupScheduleResponse> result = groupScheduleService.setPersonalScheduleToGroupSchedule(groupId, memberId, date)
+                    .stream().map(GroupScheduleResponse::of).collect(Collectors.toList());
+
+            return ApiResponse.response(ResponseCode.OK, result);
+        } catch (NoSuchElementException e) {
+            // RequestParam 데이터로 검색되지 않은 데이터가 존재할 경우
+            return ApiResponse.fail(ErrorCode.NOT_FOUND, "조회되지 않는 데이터가 포함되어 있습니다.");
         } catch (Exception e) {
             return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
