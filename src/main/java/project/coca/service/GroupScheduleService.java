@@ -243,4 +243,45 @@ public class GroupScheduleService {
         return personalScheduleRepository.save(personalSchedule);
     }
 
+    /* 내 일정 그룹일정에 통합
+     멤버가 그룹 내의 회원인지 확인 -> 멤버 개인 일정을 그룹 일정으로 저장
+    */
+    public List<GroupSchedule> setPersonalScheduleToGroupSchedule(Long groupId, String memberId, LocalDate date) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("회원이 존재하지 않습니다."));
+
+        CoGroup group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new NoSuchElementException("그룹이 존재하지 않습니다."));
+
+        GroupMember checkMember = groupMemberRepository.checkMemberInGroup(groupId, memberId)
+                .orElseThrow(() -> new NoSuchElementException("회원이 그룹에 속해있지 않습니다."));
+
+        LocalDateTime startDate = date.atStartOfDay();
+        LocalDateTime endDate = date.atTime(LocalTime.of(23, 59, 59));
+
+        List<PersonalSchedule> memberSchedule = personalScheduleRepository.findPersonalScheduleByDateRange(memberId, startDate, endDate);
+        List<GroupSchedule> newSchedule = group.getGroupSchedule();
+
+        if(memberSchedule != null && memberSchedule.size() > 0) {
+            for(PersonalSchedule personalSchedule : memberSchedule) {
+                GroupSchedule groupSchedule = new GroupSchedule();
+                groupSchedule.setCoGroup(group);
+                groupSchedule.setStartTime(personalSchedule.getStartTime());
+                groupSchedule.setEndTime(personalSchedule.getEndTime());
+                groupSchedule.setColor(personalSchedule.getColor());
+
+                if(personalSchedule.getIsPrivate())
+                    groupSchedule.setTitle(member.getUserName() + "의 비공개 일정");
+                else
+                    groupSchedule.setTitle(member.getUserName() + "의 일정: " + personalSchedule.getTitle());
+
+                newSchedule.add(groupSchedule);
+            }
+        }
+        group.setGroupSchedule(newSchedule);
+        groupRepository.save(group);
+        groupRepository.flush();
+
+        return groupScheduleRepository.findGroupSchedule(groupId, startDate, endDate);
+    }
 }
