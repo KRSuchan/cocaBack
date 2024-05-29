@@ -17,6 +17,6 @@ public class MemberRequest {
     private String id;
     private String password;
     private String userName;
-    private String profileImgPath;
-    private List<InterestForTag> interestId = new ArrayList<>();;
+    private Boolean isDefaultImage;
+    private List<InterestForTag> interestId = new ArrayList<>();
 }

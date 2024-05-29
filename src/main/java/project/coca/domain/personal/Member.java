@@ -76,10 +76,9 @@ public class Member {
     }
 
     @Builder
-    public Member(String id, String pw, String userName, String profileImgPath) {
+    public Member(String id, String pw, String userName) {
         this.id = id;
         this.password = pw;
         this.userName = userName;
-        this.profileImgPath = profileImgPath;
     }
 }
