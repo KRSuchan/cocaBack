@@ -28,25 +28,27 @@ public class JwtTokenProvider {
     private final Long DEFAULT_REFRESH_EXPIRATION_TIME = 1000L * 60 * 60 * 3; // 3시간 (ms * 초 * 분 * 시간)
 
     private final Key key;
+    private final JwtRedisService jwtRedisService;
     private UserDetailsService userDetailsService;
 
     @Autowired
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey,
-                            RedisTemplate<String, String> redisTemplate,
+                            RedisTemplate<String, String> redisTemplate, JwtRedisService jwtRedisService,
                             UserDetailsService userDetailsService) {
         this.redisTemplate = redisTemplate;
+        this.jwtRedisService = jwtRedisService;
         this.userDetailsService = userDetailsService;
         byte[] keyBytes = Base64.getDecoder().decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
     /**
-     * Access 토큰 생성
+     * 토큰 생성
      */
-    public String createAccessToken(Authentication authentication) {
+    public String generateToken(Authentication authentication, long duration) {
         Claims claims = Jwts.claims().setSubject(authentication.getName());
         Date now = new Date();
-        Date expireDate = new Date(now.getTime() + DEFAULT_ACCESS_EXPIRATION_TIME);
+        Date expireDate = new Date(now.getTime() + duration);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -57,27 +59,19 @@ public class JwtTokenProvider {
     }
 
     /**
+     * Access 토큰 생성
+     */
+    public String createAccessToken(Authentication authentication) {
+        return generateToken(authentication, DEFAULT_ACCESS_EXPIRATION_TIME);
+    }
+
+    /**
      * Refresh 토큰 생성
      */
     public String createRefreshToken(Authentication authentication) {
-        Claims claims = Jwts.claims().setSubject(authentication.getName());
-        Date now = new Date();
-        Date expireDate = new Date(now.getTime() + DEFAULT_REFRESH_EXPIRATION_TIME);
-
-        String refreshToken = Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(expireDate)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-
+        String refreshToken = generateToken(authentication, DEFAULT_REFRESH_EXPIRATION_TIME);
         // redis에 저장
-        redisTemplate.opsForValue().set(
-                authentication.getName(),
-                refreshToken,
-                DEFAULT_REFRESH_EXPIRATION_TIME
-        );
-
+        jwtRedisService.setRedisTemplate(authentication.getName(), refreshToken, DEFAULT_REFRESH_EXPIRATION_TIME);
         return refreshToken;
     }
 

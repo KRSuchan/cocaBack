@@ -1,7 +1,7 @@
 package project.coca.jwt;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,7 +11,7 @@ import project.coca.domain.personal.Member;
 import project.coca.repository.MemberRepository;
 
 @Service
-@Log4j
+@Slf4j
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
     private final MemberRepository memberRepository;

@@ -2,6 +2,7 @@ package project.coca.controller;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,6 +58,8 @@ public class MemberController {
         } catch (NoSuchElementException e) {
             // RequestParam 데이터에 조회되지 않는 데이터 있는 경우. 이 경우에는 아이디 조회 안되는거라 이런 메시지..~
             return ApiResponse.fail(ErrorCode.BAD_REQUEST, "동일한 아이디의 회원이 이미 존재합니다.");
+        } catch (BadCredentialsException e) {
+            return ApiResponse.fail(ErrorCode.BAD_REQUEST, "아이디(로그인 전용 아이디) 또는 비밀번호를 잘못 입력했습니다.\n입력하신 내용을 다시 확인해주세요.");
         } catch (Exception e) {
             return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
