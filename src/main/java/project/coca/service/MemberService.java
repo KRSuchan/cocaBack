@@ -74,6 +74,13 @@ public class MemberService {
         return tokenDto;
     }
 
+    public Boolean memberCheck(MemberFunctionRequest loginMember) {
+        Member check = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> new NoSuchElementException("아이디 혹은 비밀번호가 일치하지 않습니다."));
+
+        return loginMember.getPassword().equals(check.getPassword());
+    }
+
     public Boolean logout() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         jwtRedisService.deleteToken(user.getUsername());

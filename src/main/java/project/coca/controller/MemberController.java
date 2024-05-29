@@ -64,6 +64,17 @@ public class MemberController {
         }
     }
 
+    @PostMapping("/checkPassword")
+    public ApiResponse<Boolean> memberCheckReq(@RequestBody MemberFunctionRequest loginMember) {
+        try {
+            return ApiResponse.response(ResponseCode.OK, memberService.memberCheck(loginMember));
+        } catch (NoSuchElementException e) {
+            return ApiResponse.fail(ErrorCode.BAD_REQUEST, "비밀번호 불일치");
+        } catch (Exception e) {
+            return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
     /**
      * 로그아웃
      */
