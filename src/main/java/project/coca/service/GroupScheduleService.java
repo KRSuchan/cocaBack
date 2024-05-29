@@ -9,13 +9,13 @@ import project.coca.domain.group.*;
 import project.coca.domain.personal.Member;
 import project.coca.domain.personal.PersonalSchedule;
 import project.coca.domain.personal.PersonalScheduleAttachment;
-import project.coca.dto.request.GroupScheduleAttachmentRequest;
 import project.coca.dto.request.GroupScheduleRequest;
 import project.coca.repository.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.URL;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -45,6 +45,8 @@ public class GroupScheduleService {
     private final MemberRepository memberRepository;
     @Autowired
     private final PersonalScheduleRepository personalScheduleRepository;
+    @Autowired
+    private S3Service s3Service;
 
     //파일의 md5 생성
     private String generateFileMd5(File file) throws NoSuchAlgorithmException, IOException {
@@ -56,13 +58,15 @@ public class GroupScheduleService {
     }
 
     private GroupScheduleAttachment generateAttachment(
-            MultipartFile file, GroupSchedule schedule)
-            throws NoSuchAlgorithmException, IOException
-    {
+            MultipartFile file, GroupSchedule schedule, int divisionNum)
+            throws NoSuchAlgorithmException, IOException {
         GroupScheduleAttachment changeAttach = new GroupScheduleAttachment();
 
         changeAttach.setFileName(file.getOriginalFilename());
-        changeAttach.setFilePath("aws에 올리는 로직 추가 후 변경");
+        // 그룹 일정 첨부파일 aws 코드
+        URL url = s3Service.uploadGroupScheduleFile(file, schedule.getCoGroup().getId(), schedule.getId(), divisionNum);
+        changeAttach.setFilePath(url.toString());
+
         changeAttach.setFileMd5(generateFileMd5(file.getResource().getFile()));
         changeAttach.setGroupSchedule(schedule);
 
@@ -75,8 +79,7 @@ public class GroupScheduleService {
         -> 일정 반환
     */
     public List<GroupSchedule> groupScheduleInquiry(
-            Long groupId, String memberId, LocalDate startDay, LocalDate endDay)
-    {
+            Long groupId, String memberId, LocalDate startDay, LocalDate endDay) {
         GroupMember checkMember = groupMemberRepository.checkMemberInGroup(groupId, memberId)
                 .orElseThrow(() -> new NoSuchElementException("회원이 그룹에 속해있지 않습니다."));
 
@@ -90,8 +93,7 @@ public class GroupScheduleService {
     그룹이 존재하는지 확인 & 신청한 멤버가 관리자인지 확인 -> 등록
     파일 저장하는 로직 추가 필요
      */
-    public GroupSchedule groupScheduleRegistrationReq(GroupScheduleRequest requestSchedule, MultipartFile[] files) throws NoSuchAlgorithmException, IOException
-    {
+    public GroupSchedule groupScheduleRegistrationReq(GroupScheduleRequest requestSchedule, MultipartFile[] files) throws NoSuchAlgorithmException, IOException {
         CoGroup group = groupRepository.findById(requestSchedule.getGroupId())
                 .orElseThrow(() -> new NoSuchElementException("그룹이 존재하지 않습니다."));
 
@@ -108,10 +110,14 @@ public class GroupScheduleService {
         registSchedule.setEndTime(requestSchedule.getEndTime());
         registSchedule.setColor(requestSchedule.getColor());
 
+        // 그룹 일정 id를 얻기 위해 한 번 save 해야함
+        registSchedule = groupScheduleRepository.save(registSchedule);
+
         List<GroupScheduleAttachment> attachments = new ArrayList<>();
-        if(files != null && files.length > 0)
-            for(MultipartFile file : files)
-                attachments.add(generateAttachment(file, registSchedule));
+        if (files != null && files.length > 0)
+            for (int i = 0; i < files.length; i++) {
+                attachments.add(generateAttachment(files[0], registSchedule, i));
+            }
 
         registSchedule.setGroupScheduleAttachments(attachments);
 
@@ -123,8 +129,7 @@ public class GroupScheduleService {
     파일 저장하는 로직 추가 필요
      */
     public GroupSchedule groupScheduleUpdate(GroupScheduleRequest requestSchedule, MultipartFile[] files)
-            throws NoSuchAlgorithmException, IOException
-    {
+            throws NoSuchAlgorithmException, IOException {
         GroupManager checkUser = groupManagerRepository.checkUserIsManager(requestSchedule.getMemberId(), requestSchedule.getGroupId())
                 .orElseThrow(() -> new NoSuchElementException("해당 그룹의 관리자가 아닙니다."));
 
@@ -139,14 +144,14 @@ public class GroupScheduleService {
         updateSchedule.setColor(requestSchedule.getColor());
 
         List<String> existAttachMD5s = new ArrayList<>();
-        if(updateSchedule.getGroupScheduleAttachments() != null && updateSchedule.getGroupScheduleAttachments().size() > 0) {
-            for(GroupScheduleAttachment attachment : updateSchedule.getGroupScheduleAttachments())
+        if (updateSchedule.getGroupScheduleAttachments() != null && updateSchedule.getGroupScheduleAttachments().size() > 0) {
+            for (GroupScheduleAttachment attachment : updateSchedule.getGroupScheduleAttachments())
                 existAttachMD5s.add(attachment.getFileMd5());
         }
 
         List<String> newAttachMD5s = new ArrayList<>();
-        if(files != null && files.length > 0) {
-            for(MultipartFile file : files)
+        if (files != null && files.length > 0) {
+            for (MultipartFile file : files)
                 newAttachMD5s.add(generateFileMd5(file.getResource().getFile()));
         }
 
@@ -154,9 +159,9 @@ public class GroupScheduleService {
         List<GroupScheduleAttachment> attachmentsCopy = new ArrayList<>(updateSchedule.getGroupScheduleAttachments());
 
         //새로운거에 없음 -> 기존 DB에서 삭제
-        if(attachmentsCopy != null && attachmentsCopy.size() > 0) {
-            for(GroupScheduleAttachment attachment : attachmentsCopy) {
-                if(!newAttachMD5s.contains(attachment.getFileMd5())) {
+        if (attachmentsCopy != null && attachmentsCopy.size() > 0) {
+            for (GroupScheduleAttachment attachment : attachmentsCopy) {
+                if (!newAttachMD5s.contains(attachment.getFileMd5())) {
                     groupScheduleAttachmentRepository.delete(attachment);
                     updateSchedule.removeAttachment(attachment);
                 }
@@ -164,10 +169,10 @@ public class GroupScheduleService {
         }
 
         //기존거에 없음 -> 기존거에 새로운거 추가
-        if(newAttachMD5s != null && newAttachMD5s.size() > 0) {
-            for(int i = 0; i < newAttachMD5s.size(); i++) {
-                if(!existAttachMD5s.contains(newAttachMD5s.get(i))) {
-                    GroupScheduleAttachment newAttach = generateAttachment(files[i], updateSchedule);
+        if (newAttachMD5s != null && newAttachMD5s.size() > 0) {
+            for (int i = 0; i < newAttachMD5s.size(); i++) {
+                if (!existAttachMD5s.contains(newAttachMD5s.get(i))) {
+                    GroupScheduleAttachment newAttach = generateAttachment(files[i], updateSchedule, i);
                     groupScheduleAttachmentRepository.save(newAttach);
                     updateSchedule.addAttachment(newAttach);
                 }
@@ -196,7 +201,7 @@ public class GroupScheduleService {
         groupScheduleRepository.delete(deleteSchedule);
         groupScheduleRepository.flush();
 
-        if(groupScheduleRepository.existsById(scheduleId))
+        if (groupScheduleRepository.existsById(scheduleId))
             return false;
         else
             return true;
@@ -228,8 +233,8 @@ public class GroupScheduleService {
 
         List<PersonalScheduleAttachment> attachments = new ArrayList<>();
 
-        if(groupSchedule.getGroupScheduleAttachments() != null && groupSchedule.getGroupScheduleAttachments().size() > 0) {
-            for(GroupScheduleAttachment attachment : groupSchedule.getGroupScheduleAttachments()) {
+        if (groupSchedule.getGroupScheduleAttachments() != null && groupSchedule.getGroupScheduleAttachments().size() > 0) {
+            for (GroupScheduleAttachment attachment : groupSchedule.getGroupScheduleAttachments()) {
                 PersonalScheduleAttachment newAttachment = new PersonalScheduleAttachment();
                 newAttachment.setFilePath(attachment.getFilePath());
                 newAttachment.setFileName(attachment.getFileName());
@@ -262,15 +267,15 @@ public class GroupScheduleService {
         List<PersonalSchedule> memberSchedule = personalScheduleRepository.findPersonalScheduleByDateRange(memberId, startDate, endDate);
         List<GroupSchedule> newSchedule = group.getGroupSchedule();
 
-        if(memberSchedule != null && memberSchedule.size() > 0) {
-            for(PersonalSchedule personalSchedule : memberSchedule) {
+        if (memberSchedule != null && memberSchedule.size() > 0) {
+            for (PersonalSchedule personalSchedule : memberSchedule) {
                 GroupSchedule groupSchedule = new GroupSchedule();
                 groupSchedule.setCoGroup(group);
                 groupSchedule.setStartTime(personalSchedule.getStartTime());
                 groupSchedule.setEndTime(personalSchedule.getEndTime());
                 groupSchedule.setColor(personalSchedule.getColor());
 
-                if(personalSchedule.getIsPrivate())
+                if (personalSchedule.getIsPrivate())
                     groupSchedule.setTitle(member.getUserName() + "의 비공개 일정");
                 else
                     groupSchedule.setTitle(member.getUserName() + "의 일정: " + personalSchedule.getTitle());

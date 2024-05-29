@@ -4,11 +4,11 @@ import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import project.coca.dto.request.GroupScheduleRequest;
+import project.coca.dto.response.GroupSchedule.GroupScheduleResponse;
+import project.coca.dto.response.GroupSchedule.GroupScheduleSummaryResponse;
 import project.coca.dto.response.common.ApiResponse;
 import project.coca.dto.response.common.error.ErrorCode;
 import project.coca.dto.response.common.success.ResponseCode;
-import project.coca.dto.response.GroupSchedule.GroupScheduleResponse;
-import project.coca.dto.response.GroupSchedule.GroupScheduleSummaryResponse;
 import project.coca.dto.response.personalSchedule.PersonalScheduleResponse;
 import project.coca.service.GroupScheduleService;
 
@@ -26,7 +26,8 @@ public class GroupScheduleController {
 
     /**
      * 그룹 일정 목록 조회
-     * @param groupId  조회 할 그룹 id
+     *
+     * @param groupId   조회 할 그룹 id
      * @param memberId  회원 개인 id
      * @param startDate 예시 : 2024-05-01
      * @param endDate   예시 : 2024-05-31
@@ -34,8 +35,7 @@ public class GroupScheduleController {
      */
     @GetMapping("/groupScheduleSummaryReq")
     public ApiResponse<List<GroupScheduleSummaryResponse>> groupScheduleSummaryReq(
-            @RequestParam Long groupId, @RequestParam String memberId, @RequestParam LocalDate startDate, @RequestParam LocalDate endDate)
-    {
+            @RequestParam Long groupId, @RequestParam String memberId, @RequestParam LocalDate startDate, @RequestParam LocalDate endDate) {
         try {
             List<GroupScheduleSummaryResponse> groupScheduleList = groupScheduleService.groupScheduleInquiry(groupId, memberId, startDate, endDate)
                     .stream()
@@ -53,15 +53,15 @@ public class GroupScheduleController {
 
     /**
      * 그룹 일정 상세 정보 조회
-     * @param groupId  조회 할 그룹 id
-     * @param memberId  회원 개인 id
+     *
+     * @param groupId     조회 할 그룹 id
+     * @param memberId    회원 개인 id
      * @param inquiryDate 예시 : 2024-05-01
      * @return ApiResponse
      */
     @GetMapping("/groupScheduleSpecificReq")
     public ApiResponse<List<GroupScheduleResponse>> groupScheduleSpecificReq(
-            @RequestParam Long groupId, @RequestParam String memberId, @RequestParam LocalDate inquiryDate)
-    {
+            @RequestParam Long groupId, @RequestParam String memberId, @RequestParam LocalDate inquiryDate) {
         try {
             List<GroupScheduleResponse> groupScheduleList = groupScheduleService.groupScheduleInquiry(groupId, memberId, inquiryDate, inquiryDate)
                     .stream().map(GroupScheduleResponse::of).collect(Collectors.toList());
@@ -77,14 +77,14 @@ public class GroupScheduleController {
 
     /**
      * 그룹 일정 등록
-     * @body requestSchedule
+     *
      * @return ApiResponse
+     * @body requestSchedule
      */
     @PostMapping(value = "/groupScheduleRegistrationReq", consumes = "multipart/form-data")
     public ApiResponse<GroupScheduleResponse> groupScheduleRegistrationReq(
             @RequestPart("scheduleData") GroupScheduleRequest requestSchedule,
-            @RequestPart(value = "scheduleFiles", required = false) MultipartFile[] files)
-    {
+            @RequestPart(value = "scheduleFiles", required = false) MultipartFile[] files) {
         try {
             GroupScheduleResponse registGroupSchedule = GroupScheduleResponse.of(groupScheduleService.groupScheduleRegistrationReq(requestSchedule, files));
 
@@ -98,14 +98,14 @@ public class GroupScheduleController {
 
     /**
      * 그룹 일정 수정
-     * @body requestSchedule, scheduleId
+     *
      * @return ApiResponse
+     * @body requestSchedule, scheduleId
      */
     @PostMapping(value = "/groupScheduleUpdateReq", consumes = "multipart/form-data")
     public ApiResponse<GroupScheduleResponse> groupScheduleUpdateReq(
             @RequestPart("scheduleData") GroupScheduleRequest requestSchedule,
-            @RequestPart(value = "scheduleFiles", required = false) MultipartFile[] files)
-    {
+            @RequestPart(value = "scheduleFiles", required = false) MultipartFile[] files) {
         try {
             GroupScheduleResponse updateGroupSchedule = GroupScheduleResponse.of(groupScheduleService.groupScheduleUpdate(requestSchedule, files));
 
@@ -119,15 +119,15 @@ public class GroupScheduleController {
 
     /**
      * 그룹 일정 삭제
-     * @param groupId  조회 할 그룹 id
-     * @param scheduleId  삭제 할 스케쥴 id
-     * @param memberId 회원 개인 id
+     *
+     * @param groupId    조회 할 그룹 id
+     * @param scheduleId 삭제 할 스케쥴 id
+     * @param memberId   회원 개인 id
      * @return ApiResponse
      */
     @GetMapping("/groupScheduleDeleteReq")
     public ApiResponse<Boolean> groupScheduleDeleteReq(
-            @RequestParam Long groupId, @RequestParam Long scheduleId, @RequestParam String memberId)
-    {
+            @RequestParam Long groupId, @RequestParam Long scheduleId, @RequestParam String memberId) {
         try {
             boolean result = groupScheduleService.groupScheduleDelete(groupId, scheduleId, memberId);
 
@@ -139,15 +139,15 @@ public class GroupScheduleController {
 
     /**
      * 개인 일정으로 저장하기(하트 기능)
-     * @param groupId  조회 할 그룹 id
-     * @param scheduleId  저장 할 스케쥴 id
-     * @param memberId 회원 개인 id
+     *
+     * @param groupId    조회 할 그룹 id
+     * @param scheduleId 저장 할 스케쥴 id
+     * @param memberId   회원 개인 id
      * @return ApiResponse
      */
     @GetMapping("/setGroupScheduleToPersonalScheduleReq")
     public ApiResponse<PersonalScheduleResponse> setGroupScheduleToPersonalScheduleReq(
-            @RequestParam Long groupId, @RequestParam Long scheduleId, @RequestParam String memberId)
-    {
+            @RequestParam Long groupId, @RequestParam Long scheduleId, @RequestParam String memberId) {
         try {
             PersonalScheduleResponse result = PersonalScheduleResponse.of(groupScheduleService.setGroupScheduleToPersonalSchedule(groupId, scheduleId, memberId));
 
@@ -162,15 +162,15 @@ public class GroupScheduleController {
 
     /**
      * 개인 일정 가져오기
+     *
      * @param groupId  조회 할 그룹 id
      * @param memberId 회원 개인 id
-     * @param date  선택한 날짜
+     * @param date     선택한 날짜
      * @return ApiResponse
      */
     @GetMapping("/setPersonalScheduleToGroupScheduleReq")
     public ApiResponse<List<GroupScheduleResponse>> setPersonalScheduleToGroupScheduleReq(
-            @RequestParam Long groupId, @RequestParam String memberId, @RequestParam LocalDate date)
-    {
+            @RequestParam Long groupId, @RequestParam String memberId, @RequestParam LocalDate date) {
         try {
             List<GroupScheduleResponse> result = groupScheduleService.setPersonalScheduleToGroupSchedule(groupId, memberId, date)
                     .stream().map(GroupScheduleResponse::of).collect(Collectors.toList());
