@@ -18,20 +18,16 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          AuthenticationException authException)
-            throws IOException, ServletException, IOException {
+            throws ServletException, IOException {
         String exceptionType = (String) request.getAttribute("exception");
-        ApiResponse<?> apiResponse;
-        if (exceptionType.equals("invalidSignature")) {
-            apiResponse = ApiResponse.fail(ErrorCode.BAD_REQUEST, "invalid_signature");
-        } else if (exceptionType.equals("invalidJwt")) {
-            apiResponse = ApiResponse.fail(ErrorCode.BAD_REQUEST, "invalid_jwt");
-        } else if (exceptionType.equals("unsupportedJwt")) {
-            apiResponse = ApiResponse.fail(ErrorCode.BAD_REQUEST, "unsupported_jwt");
-        } else if (exceptionType.equals("expiredJwt")) {
-            apiResponse = ApiResponse.fail(ErrorCode.UNAUTHORIZED, "expired_jwt");
-        } else {
-            apiResponse = ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, exceptionType);
-        }
+        ApiResponse<?> apiResponse = switch (exceptionType) {
+            case "invalidSignature" -> ApiResponse.fail(ErrorCode.BAD_REQUEST, "invalid_signature");
+            case "invalidJwt" -> ApiResponse.fail(ErrorCode.BAD_REQUEST, "invalid_jwt");
+            case "unsupportedJwt" -> ApiResponse.fail(ErrorCode.BAD_REQUEST, "unsupported_jwt");
+            case "expiredJwt" -> ApiResponse.fail(ErrorCode.UNAUTHORIZED, "expired_jwt");
+            case "nullToken" -> ApiResponse.fail(ErrorCode.BAD_REQUEST, "null_token");
+            default -> ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, exceptionType);
+        };
         response.setStatus(HttpStatus.OK.value());
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().println(apiResponse.toString());

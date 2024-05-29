@@ -113,6 +113,7 @@ public class JwtTokenProvider {
      * Access 토큰을 검증
      */
     public boolean validateToken(String token, HttpServletRequest request) throws JwtException {
+        System.out.println("token: " + token);
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
@@ -131,6 +132,12 @@ public class JwtTokenProvider {
         } catch (IllegalArgumentException e) {
             log.info("JWT claims string is empty");
             request.setAttribute("exception", "claimsEmpty");
+        } catch (NullPointerException e) {
+            log.info("JWT claims string is null");
+            request.setAttribute("exception", "nullToken");
+        } catch (Exception e) {
+            log.info("Internal Server Exception");
+            request.setAttribute("exception", "internalServerException");
         }
         return false;
     }
