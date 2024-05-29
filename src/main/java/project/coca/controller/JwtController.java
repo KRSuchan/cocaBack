@@ -1,5 +1,6 @@
 package project.coca.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,9 +20,9 @@ public class JwtController {
     private final JwtService jwtService;
 
     @PostMapping("/reissue")
-    public ApiResponse<TokenDto> reissue(@RequestHeader("Authorization") String token) {
+    public ApiResponse<TokenDto> reissue(@RequestHeader("Authorization") String token, HttpServletRequest request) {
         log.info("reissue token {}", token);
-        return ApiResponse.response(ResponseCode.OK, jwtService.reissueToken(token));
+        return ApiResponse.response(ResponseCode.OK, jwtService.reissueToken(token, request));
     }
 
 }

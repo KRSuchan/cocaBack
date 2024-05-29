@@ -41,4 +41,8 @@ public class ApiResponse<T> {
                 .message(message)
                 .build();
     }
+
+    public String toString() {
+        return "{\"code\": " + code + ", \"message\": \"" + message + "\", \"data\": " + data + "}";
+    }
 }
