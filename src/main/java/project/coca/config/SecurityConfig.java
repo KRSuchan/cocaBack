@@ -50,6 +50,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/member/loginReq").permitAll()
                         .requestMatchers("/api/member/joinReq").permitAll()
                         .requestMatchers("/api/jwt/reissue").permitAll()
+                        .requestMatchers("/api/tag/all").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
