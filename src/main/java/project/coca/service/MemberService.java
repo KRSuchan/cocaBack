@@ -4,6 +4,8 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.coca.domain.personal.Member;
@@ -12,6 +14,7 @@ import project.coca.domain.tag.Tag;
 import project.coca.dto.request.MemberFunctionRequest;
 import project.coca.dto.request.MemberRequest;
 import project.coca.dto.response.tag.InterestForTag;
+import project.coca.jwt.JwtRedisService;
 import project.coca.jwt.JwtTokenProvider;
 import project.coca.jwt.TokenDto;
 import project.coca.repository.InterestRepository;
@@ -30,17 +33,19 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final TagRepository tagRepository;
     private final InterestRepository interestRepository;
+    private final JwtRedisService jwtRedisService;
     private AuthenticationManager authenticationManager;
     private JwtTokenProvider jwtTokenProvider;
 
     public MemberService(MemberRepository memberRepository,
                          TagRepository tagRepository,
-                         InterestRepository interestRepository, AuthenticationManager AuthenticationManager, JwtTokenProvider jwtTokenProvider) {
+                         InterestRepository interestRepository, AuthenticationManager AuthenticationManager, JwtTokenProvider jwtTokenProvider, JwtRedisService jwtRedisService) {
         this.memberRepository = memberRepository;
         this.tagRepository = tagRepository;
         this.interestRepository = interestRepository;
         this.authenticationManager = AuthenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.jwtRedisService = jwtRedisService;
     }
 
     //로그인
@@ -63,12 +68,10 @@ public class MemberService {
         return tokenDto;
     }
 
-    public TokenDto logout(String refreshToken) {
-        TokenDto tokenDto = new TokenDto(
-                jwtTokenProvider.generateRefreshToken(refreshToken),
-                refreshToken
-        );
-        return tokenDto;
+    public Boolean logout() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        jwtRedisService.deleteToken(user.getUsername());
+        return true;
     }
 
     //관심사 세팅~

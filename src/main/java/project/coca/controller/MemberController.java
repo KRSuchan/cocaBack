@@ -66,6 +66,15 @@ public class MemberController {
     }
 
     /**
+     * 로그아웃
+     */
+    @PostMapping("/logoutReq")
+    public ApiResponse<Boolean> logoutReq() {
+        return ApiResponse.response(ResponseCode.OK, memberService.logout());
+    }
+
+
+    /**
      * 회원탈퇴
      *
      * @return ApiResponse

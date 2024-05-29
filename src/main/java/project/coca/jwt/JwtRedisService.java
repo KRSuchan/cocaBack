@@ -13,16 +13,16 @@ import java.time.Duration;
 public class JwtRedisService {
     private final RedisTemplate<String, String> redisTemplate;
 
-    public String getMemberValue(String key) {
+    public String getToken(String key) {
         return redisTemplate.opsForValue().get(key);
     }
 
-    public void deleteMemberValue(String key) {
+    public void deleteToken(String key) {
         redisTemplate.delete(key);
     }
 
     public void setRedisTemplate(String key, String value, long time) {
-        if (getMemberValue(key) != null) deleteMemberValue(key);
+        if (getToken(key) != null) deleteToken(key);
         Duration expiredDuration = Duration.ofMillis(time);
         redisTemplate.opsForValue().set(key, value, expiredDuration);
     }
