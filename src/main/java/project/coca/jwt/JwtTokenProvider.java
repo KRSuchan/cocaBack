@@ -24,7 +24,7 @@ import java.util.Date;
 @Slf4j
 public class JwtTokenProvider {
     private final RedisTemplate<String, String> redisTemplate;
-    private final Long DEFAULT_ACCESS_EXPIRATION_TIME = 1000L * 60 * 20; // 20분 (ms * 초 * 분 * 시간)
+    private final Long DEFAULT_ACCESS_EXPIRATION_TIME = 1000L * 60 * 60; // 60분 (ms * 초 * 분 * 시간)
     private final Long DEFAULT_REFRESH_EXPIRATION_TIME = 1000L * 60 * 60 * 3; // 3시간 (ms * 초 * 분 * 시간)
 
     private final Key key;
