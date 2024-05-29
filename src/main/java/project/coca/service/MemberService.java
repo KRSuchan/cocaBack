@@ -8,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import project.coca.domain.personal.Member;
 import project.coca.domain.tag.Interest;
 import project.coca.domain.tag.Tag;
@@ -22,6 +23,8 @@ import project.coca.repository.MemberRepository;
 import project.coca.repository.TagRepository;
 
 import javax.naming.AuthenticationException;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -34,18 +37,21 @@ public class MemberService {
     private final TagRepository tagRepository;
     private final InterestRepository interestRepository;
     private final JwtRedisService jwtRedisService;
+    private final String DEFAULT_PROFILE_IMAGE_PATH = "https://cocaattachments.s3.amazonaws.com/DEFAULT_PROFILE_IMG.jpg";
+    private final S3Service s3Service;
     private AuthenticationManager authenticationManager;
     private JwtTokenProvider jwtTokenProvider;
 
     public MemberService(MemberRepository memberRepository,
                          TagRepository tagRepository,
-                         InterestRepository interestRepository, AuthenticationManager AuthenticationManager, JwtTokenProvider jwtTokenProvider, JwtRedisService jwtRedisService) {
+                         InterestRepository interestRepository, AuthenticationManager AuthenticationManager, JwtTokenProvider jwtTokenProvider, JwtRedisService jwtRedisService, S3Service s3Service) {
         this.memberRepository = memberRepository;
         this.tagRepository = tagRepository;
         this.interestRepository = interestRepository;
         this.authenticationManager = AuthenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
         this.jwtRedisService = jwtRedisService;
+        this.s3Service = s3Service;
     }
 
     //로그인
@@ -90,12 +96,12 @@ public class MemberService {
     }
 
     //회원가입
-    public Member memberJoin(MemberRequest joinMember) {
+    public Member memberJoin(MemberRequest joinMember, MultipartFile profileImage) throws IOException {
         if (memberRepository.existsById(joinMember.getId()))
             throw new DuplicateKeyException("동일한 아이디의 회원이 이미 존재합니다.");
 
         Member member = new Member(joinMember.getId(), joinMember.getPassword(),
-                joinMember.getUserName(), joinMember.getProfileImgPath());
+                joinMember.getUserName());
 
         //관심사 선택했다면 관심사도 등록 (등록 전에 관심사 있는지 검사)
         List<Interest> memberInterest;
@@ -106,6 +112,14 @@ public class MemberService {
         }
         //새 관심사 세팅
         member.setInterests(memberInterest);
+
+        // 프로필 이미지 업로드
+        if (joinMember.getIsDefaultImage()) {
+            member.setProfileImgPath(DEFAULT_PROFILE_IMAGE_PATH);
+        } else {
+            URL savedUrl = s3Service.uploadProfileImage(profileImage, member.getId());
+            member.setProfileImgPath(savedUrl.toString());
+        }
 
         Member join = memberRepository.save(member);
         memberRepository.flush();
@@ -142,13 +156,12 @@ public class MemberService {
     }
 
     //개인정보수정 -> 개인정보조회가 선행이라 pw 확인x
-    public Member memberInfoUpdate(MemberRequest newInfo) {
+    public Member memberInfoUpdate(MemberRequest newInfo, MultipartFile profileImage) throws IOException {
         Member member = memberRepository.findById(newInfo.getId())
                 .orElseThrow(() -> new NoSuchElementException("회원이 조회되지 않습니다."));
 
         member.setPassword(newInfo.getPassword());
         member.setUserName(newInfo.getUserName());
-        member.setProfileImgPath(newInfo.getProfileImgPath());
 
         //새 관심사 넣기 전 기존 관심사 삭제
         if (member.getInterests() != null && member.getInterests().size() > 0)
@@ -163,6 +176,14 @@ public class MemberService {
         }
         //새 관심사 세팅
         member.setInterests(memberInterest);
+
+        // 프로필 이미지 업로드
+        if (newInfo.getIsDefaultImage()) {
+            member.setProfileImgPath(DEFAULT_PROFILE_IMAGE_PATH);
+        } else {
+            URL savedUrl = s3Service.uploadProfileImage(profileImage, member.getId());
+            member.setProfileImgPath(savedUrl.toString());
+        }
 
         Member check = memberRepository.save(member);
         memberRepository.flush();

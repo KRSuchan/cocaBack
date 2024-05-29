@@ -3,10 +3,8 @@ package project.coca.controller;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import project.coca.dto.request.MemberFunctionRequest;
 import project.coca.dto.request.MemberRequest;
 import project.coca.dto.response.Member.MemberResponse;
@@ -34,10 +32,11 @@ public class MemberController {
     /**
      * 회원가입
      */
-    @PostMapping("/joinReq")
-    public ApiResponse<MemberResponse> JoinReq(@RequestBody MemberRequest joinMember) {
+    @PostMapping(value = "/joinReq", consumes = {"multipart/form-data"})
+    public ApiResponse<MemberResponse> JoinReq(@RequestPart("data") MemberRequest joinMember,
+                                               @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
         try {
-            MemberResponse joinResult = MemberResponse.of(memberService.memberJoin(joinMember));
+            MemberResponse joinResult = MemberResponse.of(memberService.memberJoin(joinMember, profileImage));
 
             return ApiResponse.response(ResponseCode.OK, joinResult);
         } catch (DuplicateKeyException e) {
@@ -122,10 +121,11 @@ public class MemberController {
      * @return ApiResponse
      * @body newInfo 수정 할 회원의 새 정보
      */
-    @PostMapping("/memberInfoUpdateReq")
-    public ApiResponse<MemberResponse> MemberInfoUpdateReq(@RequestBody MemberRequest newInfo) {
+    @PostMapping(value = "/memberInfoUpdateReq", consumes = {"multipart/form-data"})
+    public ApiResponse<MemberResponse> MemberInfoUpdateReq(@RequestPart("data") MemberRequest newInfo,
+                                                           @RequestPart("profileImage") MultipartFile profileImage) {
         try {
-            MemberResponse updateResult = MemberResponse.of(memberService.memberInfoUpdate(newInfo));
+            MemberResponse updateResult = MemberResponse.of(memberService.memberInfoUpdate(newInfo, profileImage));
 
             return ApiResponse.response(ResponseCode.OK, updateResult);
         } catch (NoSuchElementException e) {
