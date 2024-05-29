@@ -1,7 +1,13 @@
+jwt:
+  secret: VlwEyVBsYt9V7zq57TejMnVUyzblYcfPQye08f7MGVA9XkHa
 spring:
   output:
     ansi:
       enabled: always
+  data:
+    redis:
+      port: 6379
+      host: localhost
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/COCA?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul
     username: root
