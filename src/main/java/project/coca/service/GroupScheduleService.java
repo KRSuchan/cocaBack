@@ -196,7 +196,13 @@ public class GroupScheduleService {
         GroupSchedule deleteSchedule = groupScheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new NoSuchElementException("일정이 조회되지 않습니다."));
 
-        groupScheduleAttachmentRepository.deleteAll(deleteSchedule.getGroupScheduleAttachments());
+        if(deleteSchedule.getGroupScheduleAttachments() != null && deleteSchedule.getGroupScheduleAttachments().size() > 0) {
+            //aws에서 파일 지운 후 DB에서 삭제
+            for(GroupScheduleAttachment attachment : deleteSchedule.getGroupScheduleAttachments())
+                s3Service.deleteS3File(attachment.getFilePath());
+
+            groupScheduleAttachmentRepository.deleteAll(deleteSchedule.getGroupScheduleAttachments());
+        }
 
         groupScheduleRepository.delete(deleteSchedule);
         groupScheduleRepository.flush();
