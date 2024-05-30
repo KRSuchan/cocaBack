@@ -47,6 +47,8 @@ public class GroupScheduleService {
     private final PersonalScheduleRepository personalScheduleRepository;
     @Autowired
     private S3Service s3Service;
+    @Autowired
+    private GroupScheduleHeartRepository groupScheduleHeartRepository;
 
     //파일의 md5 생성
     private String generateFileMd5(File file) throws NoSuchAlgorithmException, IOException {
@@ -196,9 +198,9 @@ public class GroupScheduleService {
         GroupSchedule deleteSchedule = groupScheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new NoSuchElementException("일정이 조회되지 않습니다."));
 
-        if(deleteSchedule.getGroupScheduleAttachments() != null && deleteSchedule.getGroupScheduleAttachments().size() > 0) {
+        if (deleteSchedule.getGroupScheduleAttachments() != null && deleteSchedule.getGroupScheduleAttachments().size() > 0) {
             //aws에서 파일 지운 후 DB에서 삭제
-            for(GroupScheduleAttachment attachment : deleteSchedule.getGroupScheduleAttachments())
+            for (GroupScheduleAttachment attachment : deleteSchedule.getGroupScheduleAttachments())
                 s3Service.deleteS3File(attachment.getFilePath());
 
             groupScheduleAttachmentRepository.deleteAll(deleteSchedule.getGroupScheduleAttachments());
@@ -249,9 +251,15 @@ public class GroupScheduleService {
                 attachments.add(newAttachment);
             }
         }
-
         personalSchedule.setAttachments(attachments);
-        return personalScheduleRepository.save(personalSchedule);
+        personalSchedule = personalScheduleRepository.save(personalSchedule);
+        // 하트 등록
+        GroupScheduleHeart heart = new GroupScheduleHeart();
+        heart.setGroupSchedule(groupSchedule);
+        heart.setGroupMember(checkMember);
+        groupScheduleHeartRepository.save(heart);
+
+        return personalSchedule;
     }
 
     /* 내 일정 그룹일정에 통합
