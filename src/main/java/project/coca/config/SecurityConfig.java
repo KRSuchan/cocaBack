@@ -49,6 +49,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/member/loginReq").permitAll()
                         .requestMatchers("/api/member/joinReq").permitAll()
+                        .requestMatchers("/api/member/validate-id").permitAll()
                         .requestMatchers("/api/jwt/reissue").permitAll()
                         .requestMatchers("/api/tag/all").permitAll()
                         .anyRequest().authenticated()
