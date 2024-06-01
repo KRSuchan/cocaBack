@@ -54,6 +54,14 @@ public class MemberService {
         this.s3Service = s3Service;
     }
 
+    // ID 중복 확인
+    public Boolean checkDuplicationId(String id) {
+        if (id == null || id.isEmpty()) {
+            return false;
+        }
+        return memberRepository.findById(id).isEmpty();
+    }
+
     //로그인
     public TokenDto login(MemberFunctionRequest loginMember) {
         // 1. Login ID/PW 를 기반으로 Authentication 객체 생성

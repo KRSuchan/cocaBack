@@ -27,7 +27,18 @@ public class MemberController {
         this.memberService = memberService;
     }
 
-    //프로필 이미지는 필수 아님
+    /**
+     * 아이디 중복 체크
+     * id만 필요
+     */
+    @PostMapping("/validate-id")
+    public ApiResponse<Boolean> checkDuplicationId(@RequestBody MemberRequest memberRequest) {
+        try {
+            return ApiResponse.response(ResponseCode.OK, memberService.checkDuplicationId(memberRequest.getId()));
+        } catch (Exception e) {
+            return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, "예상 못한 에러, 로그 :" + e.getMessage());
+        }
+    }
 
     /**
      * 회원가입
