@@ -118,7 +118,9 @@ public class GroupScheduleService {
         List<GroupScheduleAttachment> attachments = new ArrayList<>();
         if (files != null && files.length > 0)
             for (int i = 0; i < files.length; i++) {
-                attachments.add(generateAttachment(files[0], registSchedule, i));
+                if (files[i] != null && !files[i].isEmpty()) { // 논리 AND 조건으로 수정
+                    attachments.add(generateAttachment(files[i], registSchedule, i));
+                }
             }
 
         registSchedule.setGroupScheduleAttachments(attachments);
@@ -154,7 +156,9 @@ public class GroupScheduleService {
         List<String> newAttachMD5s = new ArrayList<>();
         if (files != null && files.length > 0) {
             for (MultipartFile file : files)
-                newAttachMD5s.add(generateFileMd5(file.getResource().getFile()));
+                if (file != null && !file.isEmpty()) { // 논리 AND 조건으로 수정
+                    newAttachMD5s.add(generateFileMd5(file.getResource().getFile()));
+                }
         }
 
         //복사해서 바꿔야 오류가 안납니다...

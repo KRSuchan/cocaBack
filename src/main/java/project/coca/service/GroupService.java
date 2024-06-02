@@ -18,7 +18,6 @@ import project.coca.dto.response.common.error.AlreadyReportedException;
 import project.coca.dto.response.group.GroupDetailSearchResponse;
 import project.coca.repository.*;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -152,27 +151,31 @@ public class GroupService {
     /**
      * 22-1. 그룹 검색 by 그룹명
      */
-    public List<CoGroup> findGroupsByNameLike(String groupName, Integer pageNumber) {
+    public Page<CoGroup> findGroupsByNameLike(String groupName, Integer pageNumber) {
         // 페이지 세팅
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        // 페이징한 데이터 가져오기
-        Page<CoGroup> resultPage = groupRepository
-                .findByNameContainingOrderByGroupMembersDesc(groupName, pageable);
-        return resultPage.getContent();
+        try {
+            // 페이징한 데이터 가져오기
+            Page<CoGroup> resultPage = groupRepository
+                    .findByNameContainingOrderByGroupMembersDesc(groupName, pageable);
+            return resultPage;
+        } catch (NoSuchElementException e) {
+            return Page.empty();
+        }
     }
 
     /**
      * 22-2. 그룹 검색 by 태그
      */
-    public List<CoGroup> findGroupsByTag(String tagName, Integer pageNumber) {
+    public Page<CoGroup> findGroupsByTag(String tagName, Integer pageNumber) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         try {
             Tag tag = tagRepository.findByName(tagName).orElseThrow(() -> new NoSuchElementException("태그가 조회되지 않습니다."));
             Page<CoGroup> resultPage = groupRepository
-                    .findByGroupTagsTagNameOrderByGroupMembersDesc(tag.getName(), pageable);
-            return resultPage.getContent();
+                    .findByTagNameOrderByGroupMembersDesc(tag.getName(), pageable);
+            return resultPage;
         } catch (NoSuchElementException e) {
-            return Collections.emptyList();
+            return Page.empty();
         }
     }
 

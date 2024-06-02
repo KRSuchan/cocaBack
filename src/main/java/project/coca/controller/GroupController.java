@@ -2,6 +2,7 @@ package project.coca.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.oxm.ValidationFailureException;
 import org.springframework.web.bind.annotation.*;
 import project.coca.domain.group.CoGroup;
@@ -110,16 +111,23 @@ public class GroupController {
      * @param pageNum   : n 페이지
      * @return 그룹 id, 그룹명, 프라이빗여부, 멤버 여부, 태그 목록(id,필드,태그명), 회원 수
      */
-    @GetMapping("/find/groupName/{groupName}/pageNum/{pageNum}")
-    public ApiResponse<List<GroupResponse>> findGroupsByGroupName(@PathVariable String groupName,
+    @GetMapping({"/find/groupName/{groupName}/pageNum/{pageNum}", "/find/groupName/pageNum/{pageNum}"})
+    public ApiResponse<List<GroupResponse>> findGroupsByGroupName(@PathVariable(required = false) String groupName,
                                                                   @PathVariable Integer pageNum) {
-        log.info("Search group by title: {}", groupName);
-        List<CoGroup> groups = groupService.findGroupsByNameLike(groupName, pageNum - 1);
-        List<GroupResponse> data = groups
+        if (groupName == null || groupName.isEmpty()) {
+            // tagName이 없거나 비어 있는 경우 처리
+            log.info("Group name is missing or empty");
+            // 적절한 응답을 반환하거나 기본 동작 수행
+            groupName = "";
+        } else {
+            log.info("Search group by groupName: {}", groupName);
+        }
+        Page<CoGroup> groupPage = groupService.findGroupsByNameLike(groupName, pageNum - 1);
+        List<GroupResponse> data = groupPage.getContent()
                 .stream()
                 .map(GroupResponse::of)
                 .collect(Collectors.toList());
-        return ApiResponse.response(ResponseCode.OK, data);
+        return ApiResponse.response(ResponseCode.OK, data, pageNum, groupPage.getTotalPages());
     }
 
     /**
@@ -127,18 +135,25 @@ public class GroupController {
      *
      * @param tagName : tag 검색어
      * @param pageNum : n 페이지
-     * @return 그룹 id, 그룹명, 프라이빗여부, 멤버 여부, 태그 목록(id,필드,태그명), 회원 수
+     * @return 그룹 id, 그룹명, 프라이빗여부, 멤버 여부, 태그 목록(id,필드,태그명), 회원 수, 검색결과 총 수
      */
-    @GetMapping("/find/tag/{tagName}/pageNum/{pageNum}")
-    public ApiResponse<List<GroupResponse>> findGroupsByTag(@PathVariable String tagName,
+    @GetMapping({"/find/tag/{tagName}/pageNum/{pageNum}", "/find/tag/pageNum/{pageNum}"})
+    public ApiResponse<List<GroupResponse>> findGroupsByTag(@PathVariable(required = false) String tagName,
                                                             @PathVariable Integer pageNum) {
-        log.info("Search group by tag: {}", tagName);
-        List<CoGroup> groups = groupService.findGroupsByTag(tagName, pageNum - 1);
-        List<GroupResponse> data = groups
+        if (tagName == null || tagName.isEmpty()) {
+            // tagName이 없거나 비어 있는 경우 처리
+            log.info("Tag name is missing or empty");
+            // 적절한 응답을 반환하거나 기본 동작 수행
+            tagName = "";
+        } else {
+            log.info("Search group by tag: {}", tagName);
+        }
+        Page<CoGroup> groupPages = groupService.findGroupsByTag(tagName, pageNum - 1);
+        List<GroupResponse> data = groupPages.getContent()
                 .stream()
                 .map(GroupResponse::of)
                 .collect(Collectors.toList());
-        return ApiResponse.response(ResponseCode.OK, data);
+        return ApiResponse.response(ResponseCode.OK, data, pageNum, groupPages.getTotalPages());
     }
 
     /**
