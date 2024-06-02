@@ -11,10 +11,22 @@ public class ApiResponse<T> {
     private Integer code;
     private String message;
     private T data;
+    private Integer totalPages;
+    private Integer currentPage;
 
     public static <T> ApiResponse<T> response(ResponseCode code, T data) {
         return ApiResponse.<T>builder()
                 .code(code.getCode())
+                .message(code.getMessage())
+                .data(data)
+                .build();
+    }
+
+    public static <T> ApiResponse<T> response(ResponseCode code, T data, Integer currentPage, Integer totalCnt) {
+        return ApiResponse.<T>builder()
+                .code(code.getCode())
+                .currentPage(currentPage)
+                .totalPages(totalCnt)
                 .message(code.getMessage())
                 .data(data)
                 .build();
