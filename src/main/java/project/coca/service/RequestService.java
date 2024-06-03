@@ -31,8 +31,8 @@ public class RequestService {
     private final GroupManagerRepository groupManagerRepository;
     private final RequestedScheduleRepository requestedScheduleRepository;
     private final PersonalScheduleRepository personalScheduleRepository;
-    private final PersonalScheduleService personalScheduleService;
     private final FriendRepository friendRepository;
+    private final GroupMemberRepository groupMemberRepository;
 
     public RequestService(MemberRepository memberRepository,
                           FriendRequestRepository friendRequestRepository,
@@ -43,7 +43,9 @@ public class RequestService {
                           ScheduleRequestRepository scheduleRequestRepository,
                           GroupManagerRepository groupManagerRepository,
                           RequestedScheduleRepository requestedScheduleRepository,
-                          PersonalScheduleRepository personalScheduleRepository, PersonalScheduleService personalScheduleService, FriendRepository friendRepository) {
+                          PersonalScheduleRepository personalScheduleRepository,
+                          FriendRepository friendRepository,
+                          GroupMemberRepository groupMemberRepository) {
         this.memberRepository = memberRepository;
         this.friendRequestRepository = friendRequestRepository;
         this.groupRepository = groupRepository;
@@ -54,8 +56,8 @@ public class RequestService {
         this.groupManagerRepository = groupManagerRepository;
         this.requestedScheduleRepository = requestedScheduleRepository;
         this.personalScheduleRepository = personalScheduleRepository;
-        this.personalScheduleService = personalScheduleService;
         this.friendRepository = friendRepository;
+        this.groupMemberRepository = groupMemberRepository;
     }
 
     private static PersonalSchedule getPersonalSchedule(ScheduleRequest scheduleRequest) {
@@ -75,12 +77,27 @@ public class RequestService {
      * 36-1. 친구 요청 등록
      */
     public void addFriendRequest(String fromId, String toId) {
+        // 이미 친구인지 검증
+        // 이미 보낸 요청인지 검증
+
         // 1. fromId 회원 검증
         Member fromMember = memberRepository.findById(fromId)
                 .orElseThrow(() -> new NoSuchElementException("회원이 조회되지 않습니다."));
         // 2. toId 회원 검증
         Member toMember = memberRepository.findById(toId)
                 .orElseThrow(() -> new NoSuchElementException("회원이 조회되지 않습니다."));
+        // 2-2. 이미 친구인지 검증
+        if (friendRepository.findByMemberAndOpponent(fromMember, toMember).isPresent()) {
+            throw new AlreadyReportedException("이미 친구 관계입니다.");
+        }
+        // 2-3. 이미 대기중인 요청이 있는지 검증
+        if (friendRequestRepository.
+                findBySenderAndReceiverAndRequestStatus(fromMember, toMember, RequestStatus.PENDING).isPresent()) {
+            throw new AlreadyReportedException("이미 대기중인 요청이 있습니다.");
+        } else if (friendRequestRepository.
+                findBySenderAndReceiverAndRequestStatus(toMember, fromMember, RequestStatus.PENDING).isPresent()) {
+            throw new AlreadyReportedException("이미 관련된 요청을 받았습니다.");
+        }
         // 3. 친구 요청 생성
         FriendRequest req = new FriendRequest();
         req.setSender(fromMember);
@@ -103,6 +120,16 @@ public class RequestService {
         // 3. 그룹 검증
         CoGroup group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NoSuchElementException("그룹이 조회되지 않습니다."));
+        // 3-1. 이미 그룹 멤버인지 검증
+        if (groupMemberRepository.findByCoGroupAndGroupMember(group, toMember).isPresent()) {
+            throw new AlreadyReportedException("이미 해당 그룹의 멤버입니다.");
+        }
+        // 3-2. 이미 대기중인 요청이 있는지 검증
+        if (groupRequestRepository
+                .findByCoGroupAndReceiverAndRequestStatus(group, toMember, RequestStatus.PENDING)
+                .isPresent()) {
+            throw new AlreadyReportedException("이미 대기중인 요청이 있습니다.");
+        }
         // 4. 그룹 요청 생성
         GroupRequest req = new GroupRequest();
         req.setSender(fromMember);

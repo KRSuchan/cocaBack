@@ -17,4 +17,6 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> 
 
     // 파라미터 : Member 클래스의 groupMember 임.(네이밍 오류..)
     List<GroupMember> findAllByGroupMemberAndCoGroup(Member member, CoGroup group);
+
+    Optional<GroupMember> findByCoGroupAndGroupMember(CoGroup coGroup, Member member);
 }
