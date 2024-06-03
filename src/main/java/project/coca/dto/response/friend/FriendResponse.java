@@ -7,7 +7,7 @@ import project.coca.domain.personal.Friend;
 @Builder
 @Data
 public class FriendResponse {
-    private Long friendId;
+    private Long friendId; // 친구관계 고유 아이디
     private String friendMemberId;
     private String friendName;
     private String friendProfileImagePath;

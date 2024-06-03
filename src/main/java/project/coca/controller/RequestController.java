@@ -44,6 +44,8 @@ public class RequestController {
             return ApiResponse.success(ResponseCode.CREATED, "친구 요청 완료");
         } catch (NoSuchElementException e) {
             return ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage());
+        } catch (AlreadyReportedException e) {
+            return ApiResponse.fail(ErrorCode.ALREADY_EXISTS, e.getMessage());
         } catch (Exception e) {
             return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -63,6 +65,8 @@ public class RequestController {
             return ApiResponse.success(ResponseCode.CREATED, "그룹 초대 요청 완료");
         } catch (NoSuchElementException e) {
             return ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage());
+        } catch (AlreadyReportedException e) {
+            return ApiResponse.fail(ErrorCode.ALREADY_EXISTS, e.getMessage());
         } catch (Exception e) {
             return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
