@@ -1,7 +1,10 @@
 package project.coca.domain.personal;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import project.coca.domain.group.CoGroup;
 import project.coca.domain.group.GroupManager;
 import project.coca.domain.group.GroupMember;
@@ -16,7 +19,6 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@ToString
 @NoArgsConstructor
 public class Member {
     @Id
@@ -70,15 +72,17 @@ public class Member {
     private List<FriendRequest> friendRequestsAsReceiver = new ArrayList<>();
 
     @Builder
-    public Member(String id, String pw) {
+    public Member(String id, String password, String userName, String profileImgPath) {
         this.id = id;
-        this.password = pw;
+        this.password = password;
+        this.userName = userName;
+        this.profileImgPath = profileImgPath;
     }
 
     @Builder
-    public Member(String id, String pw, String userName) {
+    public Member(String id, String password, String userName) {
         this.id = id;
-        this.password = pw;
+        this.password = password;
         this.userName = userName;
     }
 }

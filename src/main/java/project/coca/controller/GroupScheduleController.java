@@ -90,8 +90,10 @@ public class GroupScheduleController {
 
             return ApiResponse.response(ResponseCode.OK, registGroupSchedule);
         } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
             return ApiResponse.fail(ErrorCode.NOT_FOUND, "조회되지 않는 데이터가 포함되어 있습니다.");
         } catch (Exception e) {
+            e.printStackTrace();
             return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
@@ -111,10 +113,10 @@ public class GroupScheduleController {
 
             return ApiResponse.response(ResponseCode.OK, updateGroupSchedule);
         } catch (NoSuchAlgorithmException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
             return ApiResponse.fail(ErrorCode.NOT_FOUND, "조회되지 않는 데이터가 포함되어 있습니다.");
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
             return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
