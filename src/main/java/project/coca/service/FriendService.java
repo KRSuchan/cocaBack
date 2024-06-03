@@ -51,8 +51,8 @@ public class FriendService {
         Friend friend = friendRepository.findById(friendId)
                 .orElseThrow(() -> new NoSuchElementException("친구가 조회되지 않습니다."));
         LocalDate now = LocalDate.now();
-        LocalDate sevenDaysAgo = now.minusDays(7);
-        LocalDate sevenDaysLater = now.plusDays(7);
+        LocalDate sevenDaysAgo = now.minusDays(6);
+        LocalDate sevenDaysLater = now.plusDays(6);
         return personalScheduleService.findPersonalSchedulesByDates(friend.getOpponent().getId(), sevenDaysAgo, sevenDaysLater);
     }
 
