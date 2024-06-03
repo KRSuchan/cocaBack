@@ -51,8 +51,9 @@ public class FriendService {
         Friend friend = friendRepository.findById(friendId)
                 .orElseThrow(() -> new NoSuchElementException("친구가 조회되지 않습니다."));
         LocalDate now = LocalDate.now();
-        LocalDate sevenDaysLater = now.plusDays(7);
-        return personalScheduleService.findPersonalSchedulesByDates(friend.getOpponent().getId(), now, sevenDaysLater);
+        LocalDate sevenDaysAgo = now.minusDays(6);
+        LocalDate sevenDaysLater = now.plusDays(6);
+        return personalScheduleService.findPersonalSchedulesByDates(friend.getOpponent().getId(), sevenDaysAgo, sevenDaysLater);
     }
 
     /**
@@ -81,16 +82,16 @@ public class FriendService {
     /**
      * 35. 친구 삭제
      */
-    public void deleteFriend(Friend deleteFriend) {
+    public void deleteFriend(Long friendId) {
         // 친구 관계 조회
-        Friend findFriend = friendRepository.findById(deleteFriend.getId())
-                .orElseThrow(() -> new NoSuchElementException("1. 친구가 조회되지 않습니다."));
-        Member member = memberRepository.findById(deleteFriend.getMember().getId())
+        Friend findFriend = friendRepository.findById(friendId)
                 .orElseThrow(() -> new NoSuchElementException("친구 관계가 조회되지 않습니다."));
+        Member member = memberRepository.findById(findFriend.getMember().getId())
+                .orElseThrow(() -> new NoSuchElementException("회원이 조회되지 않습니다."));
         Member opponent = findFriend.getOpponent();
         // 서로 관계가 반대인 친구 관계 조회
         Friend opponentFriend = friendRepository.findByMemberAndOpponent(opponent, member)
-                .orElseThrow(() -> new NoSuchElementException("2. 친구가 조회되지 않습니다."));
+                .orElseThrow(() -> new NoSuchElementException("상대방이 조회되지 않습니다."));
         friendRepository.delete(findFriend);
         friendRepository.delete(opponentFriend);
     }
