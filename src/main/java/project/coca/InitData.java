@@ -1,0 +1,90 @@
+package project.coca;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
+import project.coca.domain.group.CoGroup;
+import project.coca.domain.personal.Member;
+import project.coca.domain.tag.Tag;
+import project.coca.repository.MemberRepository;
+import project.coca.repository.TagRepository;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class InitData {
+    private final initService initService;
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void initData() throws IOException {
+        log.info("데이터 초기화 시작");
+//        initService.init();
+        log.info("데이터 초기화 끝");
+    }
+
+    @RequiredArgsConstructor
+    @Component
+    @Transactional
+    public static class initService {
+        private final TagRepository tagRepository;
+        private final MemberRepository memberRepository;
+        private List<Member> memberList = new ArrayList<>();
+        private List<CoGroup> coGroupList = new ArrayList<>();
+        private List<Tag> tagList = new ArrayList<>();
+
+        public void init() throws IOException {
+            initTag();
+            initMember();
+        }
+
+        private void initMember() {
+            String defaultImgPath = "https://cocaattachments.s3.amazonaws.com/DEFAULT_PROFILE_IMG.jpg";
+            // tester0000, tester1111, ..., tester9999 10명 생성
+            for (int i = 0; i <= 9; i++) {
+                StringBuilder builder = new StringBuilder();
+                builder.append(String.valueOf(i).repeat(4));
+                initMember("tester" + builder, "tester" + builder, "테스터" + i, defaultImgPath);
+            }
+            memberList = memberRepository.findAll();
+        }
+
+        private void initMember(String id, String pwd, String userName, String profileImgPath) {
+            Member member = new Member(id, pwd, userName, profileImgPath);
+            memberRepository.save(member);
+        }
+
+        private void initTag() {
+            initTag("IT", "스프링");
+            initTag("IT", "자바");
+            initTag("IT", "리액트");
+            initTag("IT", "자바스크립트");
+
+            initTag("여행", "일본");
+            initTag("여행", "미국");
+            initTag("여행", "영국");
+            initTag("여행", "호주");
+
+            initTag("취업", "공모전");
+            initTag("취업", "자격증");
+            initTag("취업", "컨설팅");
+            initTag("취업", "부트캠프");
+
+            tagList = tagRepository.findAll();
+        }
+
+        private void initTag(String field, String name) {
+            Tag tag = Tag.builder()
+                    .field(field)
+                    .name(name)
+                    .build();
+            tagRepository.save(tag);
+        }
+    }
+}
