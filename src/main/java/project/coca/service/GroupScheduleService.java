@@ -51,7 +51,7 @@ public class GroupScheduleService {
     private GroupScheduleHeartRepository groupScheduleHeartRepository;
 
     //파일의 md5 생성
-    private String generateFileMd5(File file) throws NoSuchAlgorithmException, IOException {
+    public String generateFileMd5(File file) throws NoSuchAlgorithmException, IOException {
         MessageDigest md = MessageDigest.getInstance("MD5");
         md.update(Files.readAllBytes(file.toPath()));
         byte[] hash = md.digest();
@@ -60,16 +60,19 @@ public class GroupScheduleService {
     }
 
     private GroupScheduleAttachment generateAttachment(
-            MultipartFile file, GroupSchedule schedule, int divisionNum)
+            MultipartFile multipartFile, GroupSchedule schedule, int divisionNum)
             throws NoSuchAlgorithmException, IOException {
         GroupScheduleAttachment changeAttach = new GroupScheduleAttachment();
 
-        changeAttach.setFileName(file.getOriginalFilename());
+        changeAttach.setFileName(multipartFile.getOriginalFilename());
         // 그룹 일정 첨부파일 aws 코드
-        URL url = s3Service.uploadGroupScheduleFile(file, schedule.getCoGroup().getId(), schedule.getId(), divisionNum);
+        URL url = s3Service.uploadGroupScheduleFile(multipartFile, schedule.getCoGroup().getId(), schedule.getId(), divisionNum);
         changeAttach.setFilePath(url.toString());
 
-        changeAttach.setFileMd5(generateFileMd5(file.getResource().getFile()));
+        File file = new File(multipartFile.getOriginalFilename());
+        multipartFile.transferTo(file);
+
+        changeAttach.setFileMd5(generateFileMd5(file));
         changeAttach.setGroupSchedule(schedule);
 
         return changeAttach;
@@ -155,9 +158,12 @@ public class GroupScheduleService {
 
         List<String> newAttachMD5s = new ArrayList<>();
         if (files != null && files.length > 0) {
-            for (MultipartFile file : files)
-                if (file != null && !file.isEmpty()) { // 논리 AND 조건으로 수정
-                    newAttachMD5s.add(generateFileMd5(file.getResource().getFile()));
+            for (MultipartFile multipartFile : files)
+                if (multipartFile != null && !multipartFile.isEmpty()) {
+                    File file = new File(multipartFile.getOriginalFilename());
+                    multipartFile.transferTo(file);
+
+                    newAttachMD5s.add(generateFileMd5(file));
                 }
         }
 

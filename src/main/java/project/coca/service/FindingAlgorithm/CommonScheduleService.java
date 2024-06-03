@@ -77,14 +77,14 @@ public class CommonScheduleService {
                 }
             }
             if (isAvailable)
-                resultSchedule.add(new EmptySchedule(startDate.atStartOfDay().plusDays(i), startDate.atTime(23, 59, 59).plusDays(duration)));
+                resultSchedule.add(new EmptySchedule(startDate.atStartOfDay().plusDays(i), startDate.atTime(23, 59, 59).plusDays(duration + 1)));
         }
         return resultSchedule;
     }
 
     private List<EmptySchedule> interval(LocalDateTime startTime, LocalDateTime endTime, int duration, List<String> members) {
         List<Interval> combined = new ArrayList<>();
-        final int tineSlot = 10;
+        final int tineSlot = 60;
 
         for(String memberId : members) {
             List<PersonalSchedule> personalSchedules = personalScheduleRepository.findPersonalScheduleByDateRange(memberId, startTime, endTime);
