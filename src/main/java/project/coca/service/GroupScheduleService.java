@@ -12,11 +12,15 @@ import project.coca.domain.personal.PersonalScheduleAttachment;
 import project.coca.dto.request.GroupScheduleRequest;
 import project.coca.repository.*;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
@@ -53,9 +57,15 @@ public class GroupScheduleService {
     //파일의 md5 생성
     public String generateFileMd5(File file) throws NoSuchAlgorithmException, IOException {
         MessageDigest md = MessageDigest.getInstance("MD5");
-        md.update(Files.readAllBytes(file.toPath()));
-        byte[] hash = md.digest();
+//        byte[] fileData = Files.readAllBytes(Path.of(file.getPath()));
 
+        FileInputStream fileInputStream = new FileInputStream(file);
+        byte[] dataBytes = new byte[1024];
+        Integer nRead = 0;
+        while((nRead = fileInputStream.read(dataBytes)) != -1)
+            md.update(dataBytes, 0, nRead);
+
+        byte[] hash = md.digest();
         return new BigInteger(1, hash).toString(16);
     }
 
