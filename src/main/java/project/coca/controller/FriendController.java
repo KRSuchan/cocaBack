@@ -91,13 +91,13 @@ public class FriendController {
      * 35. 친구 삭제
      * 나의 친구관계, 친구의 친구관계 두개 삭제함.
      *
-     * @param deleteFriend 친구 관계 id 필요
+     * @param friendId 친구 관계 id 필요
      */
-    @DeleteMapping("/delete")
-    public ApiResponse<?> deleteFriend(@RequestBody Friend deleteFriend) {
-        log.info("delete friend {}", deleteFriend);
+    @DeleteMapping("/delete/{friendId}")
+    public ApiResponse<?> deleteFriend(@PathVariable Long friendId) {
+        log.info("delete friend {}", friendId);
         try {
-            friendService.deleteFriend(deleteFriend);
+            friendService.deleteFriend(friendId);
             return ApiResponse.success(ResponseCode.OK, "친구 삭제 완료");
         } catch (NoSuchElementException e) {
             return ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage());
