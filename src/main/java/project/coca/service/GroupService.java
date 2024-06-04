@@ -18,6 +18,7 @@ import project.coca.dto.response.common.error.AlreadyReportedException;
 import project.coca.dto.response.group.GroupDetailSearchResponse;
 import project.coca.repository.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -195,7 +196,7 @@ public class GroupService {
      */
     public void updateGroup(Member admin,
                             CoGroup updateGroup,
-                            List<GroupTag> groupTags,
+                            List<Tag> groupTags,
                             GroupNotice notice,
                             List<Member> membersToManager,
                             List<Member> managersToMember) {
@@ -238,13 +239,16 @@ public class GroupService {
         System.out.println("매니저에서 일반회원으로 변경 완");
         // 4. 그룹 태그 모두 삭제 후 재세팅
         groupTagRepository.deleteAllByCoGroupId(findGroup.getId());
-        for (GroupTag groupTag : groupTags) {
-            groupTag.setCoGroup(findGroup);
-            Tag tag = tagRepository.findById(groupTag.getTag().getId())
+        List<GroupTag> newGroupTags = new ArrayList<>();
+        for (Tag groupTag : groupTags) {
+            GroupTag newGroupTag = new GroupTag();
+            newGroupTag.setCoGroup(findGroup);
+            Tag tag = tagRepository.findById(groupTag.getId())
                     .orElseThrow(() -> new NoSuchElementException("태그가 조회되지 않습니다."));
-            groupTag.setTag(tag);
+            newGroupTag.setTag(tag);
+            newGroupTags.add(newGroupTag);
         }
-        findGroup.setGroupTags(groupTags);
+        findGroup.setGroupTags(newGroupTags);
         System.out.println("그룹 태그 모두 삭제 후 재세팅 완");
         // 5. 조회된 그룹의 공지 등록 / 수정 / 삭제
         GroupNotice existingNotice = findGroup.getGroupNotice();
