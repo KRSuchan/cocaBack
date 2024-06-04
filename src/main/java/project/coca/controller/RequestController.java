@@ -8,8 +8,7 @@ import project.coca.domain.request.GroupRequest;
 import project.coca.domain.request.RequestStatus;
 import project.coca.domain.request.ScheduleRequest;
 import project.coca.dto.request.RequestUpdateRequest;
-import project.coca.dto.request.ScheduleRequestToFriend;
-import project.coca.dto.request.ScheduleRequestToGroupMember;
+import project.coca.dto.request.ScheduleRequestRequest;
 import project.coca.dto.response.common.ApiResponse;
 import project.coca.dto.response.common.error.AlreadyReportedException;
 import project.coca.dto.response.common.error.ErrorCode;
@@ -73,36 +72,23 @@ public class RequestController {
     }
 
     /**
-     * 36-3-a. 그룹멤버에게 빈일정 추가 요청 등록
+     * 36-3. 빈일정 추가 요청 등록 통합
      */
-    @PostMapping("/add/schedule/group-member")
-    public ApiResponse<?> addScheduleRequestToGroupMember(@RequestBody ScheduleRequestToGroupMember request) {
-        log.info("add ScheduleRequestToGroupMember {}", request);
+    @PostMapping("/add/schedule")
+    public ApiResponse<?> addScheduleRequest(@RequestBody ScheduleRequestRequest request) {
+        log.info("add schedule {}", request);
         try {
-            requestService.addScheduleRequestToGroupMember(request.getGroupId(), request.getManager(), request.getRequestedSchedule(), request.getGroupMembers());
-            return ApiResponse.success(ResponseCode.CREATED, "그룹 멤버에게 빈일정 추가 요청 완료");
+            requestService.addScheduleRequest(request.getSender(), request.getRequestedSchedule(), request.getReceivers());
+            return ApiResponse.success(ResponseCode.OK, "빈일정 추가 요청 등록 완료");
         } catch (NoSuchElementException e) {
+            e.printStackTrace();
             return ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage());
         } catch (Exception e) {
+            e.printStackTrace();
             return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
-    /**
-     * 36-3-b. 친구에게 빈일정 추가 요청 등록
-     */
-    @PostMapping("/add/schedule/friends")
-    public ApiResponse<?> addScheduleRequestToFriend(@RequestBody ScheduleRequestToFriend request) {
-        log.info("add addScheduleRequestToFriend {}", request);
-        try {
-            requestService.addScheduleRequestToFriend(request.getMember(), request.getRequestedSchedule(), request.getFriends());
-            return ApiResponse.success(ResponseCode.CREATED, "친구에게 빈일정 추가 요청 완료");
-        } catch (NoSuchElementException e) {
-            return ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage());
-        } catch (Exception e) {
-            return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
-        }
-    }
 
     /**
      * 37-1. 친구 요청 목록 조회
