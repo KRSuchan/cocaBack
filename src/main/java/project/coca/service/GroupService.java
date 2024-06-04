@@ -32,7 +32,7 @@ public class GroupService {
     private final GroupTagRepository groupTagRepository;
     private final GroupNoticeRepository groupNoticeRepository;
 
-    private Integer pageSize = 20;
+    private Integer pageSize = 8;
 
     @Autowired
     public GroupService(GroupRepository groupRepository,
