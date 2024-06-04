@@ -57,7 +57,7 @@ public class PersonalScheduleService {
         // 새로운 첨부 파일 추가
         if (attachments != null && attachments.length > 0) { // null 체크 추가
             for (MultipartFile attachment : attachments) {
-                if (attachment != null && !attachment.isEmpty()) { // 논리 AND 조건으로 수정
+                if (attachment != null) { // 논리 AND 조건으로 수정
                     saveAttachment(member, savedSchedule, attachment);
                 }
             }
@@ -117,7 +117,7 @@ public class PersonalScheduleService {
         // 새로운 첨부 파일 추가
         if (attachments != null && attachments.length > 0) { // null 체크 추가
             for (MultipartFile attachment : attachments) {
-                if (attachment != null && !attachment.isEmpty()) { // 논리 AND 조건으로 수정
+                if (attachment != null) { // 논리 AND 조건으로 수정
                     saveAttachment(member, foundPersonalSchedule, attachment);
                 }
             }

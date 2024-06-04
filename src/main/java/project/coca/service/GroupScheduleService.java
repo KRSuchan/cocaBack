@@ -12,17 +12,12 @@ import project.coca.domain.personal.PersonalScheduleAttachment;
 import project.coca.dto.request.GroupScheduleRequest;
 import project.coca.repository.*;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigInteger;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -55,18 +50,14 @@ public class GroupScheduleService {
     private GroupScheduleHeartRepository groupScheduleHeartRepository;
 
     //파일의 md5 생성
-    public String generateFileMd5(File file) throws NoSuchAlgorithmException, IOException {
+    public String generateFileMd5(MultipartFile file) throws NoSuchAlgorithmException, IOException {
         MessageDigest md = MessageDigest.getInstance("MD5");
-//        byte[] fileData = Files.readAllBytes(Path.of(file.getPath()));
+        byte[] fileByte = file.getBytes();
 
-        FileInputStream fileInputStream = new FileInputStream(file);
-        byte[] dataBytes = new byte[1024];
-        Integer nRead = 0;
-        while((nRead = fileInputStream.read(dataBytes)) != -1)
-            md.update(dataBytes, 0, nRead);
-
+        md.update(fileByte);
         byte[] hash = md.digest();
-        return new BigInteger(1, hash).toString(16);
+
+        return new BigInteger(1, hash).toString(16) + file.getName();
     }
 
     private GroupScheduleAttachment generateAttachment(
@@ -79,10 +70,7 @@ public class GroupScheduleService {
         URL url = s3Service.uploadGroupScheduleFile(multipartFile, schedule.getCoGroup().getId(), schedule.getId(), divisionNum);
         changeAttach.setFilePath(url.toString());
 
-        File file = new File(multipartFile.getOriginalFilename());
-        multipartFile.transferTo(file);
-
-        changeAttach.setFileMd5(generateFileMd5(file));
+        changeAttach.setFileMd5(generateFileMd5(multipartFile));
         changeAttach.setGroupSchedule(schedule);
 
         return changeAttach;
@@ -131,11 +119,9 @@ public class GroupScheduleService {
         List<GroupScheduleAttachment> attachments = new ArrayList<>();
         if (files != null && files.length > 0)
             for (int i = 0; i < files.length; i++) {
-                if (files[i] != null && !files[i].isEmpty()) { // 논리 AND 조건으로 수정
+                if (files[i] != null) // 논리 AND 조건으로 수정
                     attachments.add(generateAttachment(files[i], registSchedule, i));
-                }
             }
-
         registSchedule.setGroupScheduleAttachments(attachments);
 
         return groupScheduleRepository.save(registSchedule);
@@ -169,11 +155,8 @@ public class GroupScheduleService {
         List<String> newAttachMD5s = new ArrayList<>();
         if (files != null && files.length > 0) {
             for (MultipartFile multipartFile : files)
-                if (multipartFile != null && !multipartFile.isEmpty()) {
-                    File file = new File(multipartFile.getOriginalFilename());
-                    multipartFile.transferTo(file);
-
-                    newAttachMD5s.add(generateFileMd5(file));
+                if (multipartFile != null) {
+                    newAttachMD5s.add(generateFileMd5(multipartFile));
                 }
         }
 
