@@ -1,5 +1,6 @@
 package project.coca.controller;
 
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -11,10 +12,12 @@ import project.coca.dto.response.Member.MemberResponse;
 import project.coca.dto.response.common.ApiResponse;
 import project.coca.dto.response.common.error.ErrorCode;
 import project.coca.dto.response.common.success.ResponseCode;
+import project.coca.dto.response.tag.InterestForTag;
 import project.coca.jwt.TokenDto;
 import project.coca.service.MemberService;
 
 import javax.naming.AuthenticationException;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @ComponentScan
@@ -150,6 +153,19 @@ public class MemberController {
             MemberResponse updateResult = MemberResponse.of(memberService.memberInfoUpdate(newInfo, profileImage));
 
             return ApiResponse.response(ResponseCode.OK, updateResult);
+        } catch (NoSuchElementException e) {
+            return ApiResponse.fail(ErrorCode.NOT_FOUND, "조회되지 않는 데이터가 포함되어있습니다.");
+        } catch (Exception e) {
+            return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    @GetMapping("/memberTagInquiryReq")
+    public ApiResponse<List<InterestForTag>> MemberTagInquiryReq(@RequestParam String memberId) {
+        try {
+            List<InterestForTag> result = memberService.memberTagInquiry(memberId);
+
+            return ApiResponse.response(ResponseCode.OK, result);
         } catch (NoSuchElementException e) {
             return ApiResponse.fail(ErrorCode.NOT_FOUND, "조회되지 않는 데이터가 포함되어있습니다.");
         } catch (Exception e) {

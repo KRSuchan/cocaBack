@@ -205,4 +205,17 @@ public class MemberService {
 
         return check;
     }
+
+    public List<InterestForTag> memberTagInquiry(String memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("회원이 조회되지 않습니다."));
+
+        List<InterestForTag> memberTag = new ArrayList<>();
+
+        if(member.getInterests() != null && member.getInterests().size() > 0) {
+            for(Interest interest : member.getInterests())
+                memberTag.add(InterestForTag.of(interest));
+        }
+        return memberTag;
+    }
 }
