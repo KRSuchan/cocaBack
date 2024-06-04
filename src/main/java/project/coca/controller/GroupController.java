@@ -10,6 +10,7 @@ import project.coca.domain.group.GroupMember;
 import project.coca.domain.group.GroupNotice;
 import project.coca.domain.personal.Member;
 import project.coca.domain.tag.GroupTag;
+import project.coca.domain.tag.Tag;
 import project.coca.dto.request.GroupRequest;
 import project.coca.dto.request.GroupUpdateRequest;
 import project.coca.dto.response.common.ApiResponse;
@@ -189,7 +190,7 @@ public class GroupController {
     public ApiResponse<?> updateGroup(@RequestBody GroupUpdateRequest request) {
         Member member = request.getAdmin();
         CoGroup group = request.getGroup();
-        List<GroupTag> groupTags = request.getGroupTags();
+        List<Tag> groupTags = request.getGroupTags();
         GroupNotice notice = request.getNotice();
         List<Member> membersToManager = request.getMembersToManager();
         List<Member> managersToMember = request.getManagersToMember();
