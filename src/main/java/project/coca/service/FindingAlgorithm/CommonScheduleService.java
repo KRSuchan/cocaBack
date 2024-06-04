@@ -4,9 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import project.coca.domain.personal.Member;
 import project.coca.domain.personal.PersonalSchedule;
 import project.coca.dto.request.FindEmptyScheduleRequest;
-import project.coca.dto.response.EmptySchedule;
+import project.coca.dto.response.CommonSchedule;
+import project.coca.dto.response.personalSchedule.PersonalScheduleForEmptyScheduleResponse;
+import project.coca.repository.MemberRepository;
 import project.coca.repository.PersonalScheduleRepository;
 import project.coca.service.FindingAlgorithm.Interval;
 
@@ -14,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -21,6 +25,8 @@ import java.util.*;
 public class CommonScheduleService {
     @Autowired
     private final PersonalScheduleRepository personalScheduleRepository;
+    @Autowired
+    private final MemberRepository memberRepository;
 
     //하루는 무조건 00~00으로 침
     //날짜 단위 -> DP 활용 브루트포스
@@ -28,7 +34,25 @@ public class CommonScheduleService {
     //날짜 + 시간 -> 인터벌 알고리즘
     //n => 분
 
-    public List<EmptySchedule> findEmptySchedule(FindEmptyScheduleRequest request) {
+    public List<PersonalScheduleForEmptyScheduleResponse> memberScheduleReq(FindEmptyScheduleRequest memberList) {
+        LocalDateTime startTime = memberList.getStartDate().atStartOfDay();
+        LocalDateTime endTime = memberList.getEndDate().atTime(23, 59, 59);
+
+        List<PersonalScheduleForEmptyScheduleResponse> result = new ArrayList<>();
+
+        if(memberList.getMembers() != null && memberList.getMembers().size() > 0) {
+            for(String memberId : memberList.getMembers()) {
+                Member member = memberRepository.findById(memberId).orElseThrow(() -> new NoSuchElementException("회원이 조회되지 않습니다."));
+                List<CommonSchedule> schedule = personalScheduleRepository.findPersonalScheduleByDateRange(memberId, startTime, endTime)
+                                .stream().map(CommonSchedule::of).collect(Collectors.toList());
+
+                result.add(new PersonalScheduleForEmptyScheduleResponse(member.getId(), member.getUserName(), schedule));
+            }
+        }
+        return result;
+    }
+
+    public List<CommonSchedule> findEmptySchedule(FindEmptyScheduleRequest request) {
         if(request.getFindDay() > 0) {
             int period = (int) ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) + 1; //if(24~29)면 6일 필요
 
@@ -45,7 +69,7 @@ public class CommonScheduleService {
         }
     }
 
-    private List<EmptySchedule> bruteForce(LocalDate startDate, int duration, int period, List<String> members) {
+    private List<CommonSchedule> bruteForce(LocalDate startDate, int duration, int period, List<String> members) {
         boolean daySlot[] = new boolean[period];
         Arrays.fill(daySlot, true);
 
@@ -66,7 +90,7 @@ public class CommonScheduleService {
             }
         }
 
-        List<EmptySchedule> resultSchedule = new ArrayList<>();
+        List<CommonSchedule> resultSchedule = new ArrayList<>();
 
         for(int i = 0; i <= daySlot.length - duration; i++) {
             boolean isAvailable = true;
@@ -77,12 +101,12 @@ public class CommonScheduleService {
                 }
             }
             if (isAvailable)
-                resultSchedule.add(new EmptySchedule(startDate.atStartOfDay().plusDays(i), startDate.atTime(23, 59, 59).plusDays(duration + 1)));
+                resultSchedule.add(new CommonSchedule(startDate.atStartOfDay().plusDays(i), startDate.atTime(23, 59, 59).plusDays(duration + 1)));
         }
         return resultSchedule;
     }
 
-    private List<EmptySchedule> interval(LocalDateTime startTime, LocalDateTime endTime, int duration, List<String> members) {
+    private List<CommonSchedule> interval(LocalDateTime startTime, LocalDateTime endTime, int duration, List<String> members) {
         List<Interval> combined = new ArrayList<>();
         final int tineSlot = 60;
 
@@ -97,13 +121,13 @@ public class CommonScheduleService {
         List<Interval> mergeSchedule = IntervalMerge.intervalMerge(combined);
         Collections.sort(mergeSchedule, Comparator.comparing(Interval::getStart));
 
-        List<EmptySchedule> resultSchedule = new ArrayList<>(); //빈 일정이 담기는 리스트
+        List<CommonSchedule> resultSchedule = new ArrayList<>(); //빈 일정이 담기는 리스트
         LocalDateTime current = startTime;
 
         for (Interval interval : mergeSchedule)
         {
             while ((current.plusMinutes(duration).isBefore(interval.getStart()) || current.plusMinutes(duration).isEqual(interval.getStart()))) {
-                resultSchedule.add(new EmptySchedule(current, current.plusMinutes(duration)));
+                resultSchedule.add(new CommonSchedule(current, current.plusMinutes(duration)));
                 current = current.plusMinutes(tineSlot); // 다음 빈 시간대를 검색하기 위해 시간 증가
             }
             // 현재 시간을 다음 일정의 끝 시간으로 업데이트
@@ -112,7 +136,7 @@ public class CommonScheduleService {
         }
 
         while (current.plusMinutes(duration).isBefore(endTime) || current.plusMinutes(duration).isEqual(endTime)) {
-            resultSchedule.add(new EmptySchedule(current, current.plusMinutes(duration)));
+            resultSchedule.add(new CommonSchedule(current, current.plusMinutes(duration)));
             current = current.plusMinutes(tineSlot);
         }
         return resultSchedule;
