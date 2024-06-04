@@ -232,7 +232,7 @@ public class GroupController {
         } catch (NoSuchElementException e) {
             return ApiResponse.fail(ErrorCode.NOT_FOUND, e.getMessage());
         } catch (ValidationFailureException e) {
-            return ApiResponse.fail(ErrorCode.UNAUTHORIZED, e.getMessage());
+            return ApiResponse.fail(ErrorCode.FORBIDDEN, e.getMessage());
         } catch (Exception e) {
             return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
