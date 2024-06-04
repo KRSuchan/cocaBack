@@ -3,8 +3,6 @@ package project.coca.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.coca.domain.group.CoGroup;
-import project.coca.domain.group.GroupManager;
-import project.coca.domain.personal.Friend;
 import project.coca.domain.personal.Member;
 import project.coca.domain.personal.PersonalSchedule;
 import project.coca.domain.request.*;
@@ -14,7 +12,6 @@ import project.coca.repository.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -63,13 +60,24 @@ public class RequestService {
         PersonalSchedule personalSchedule = new PersonalSchedule();
         RequestedSchedule requestedSchedule = scheduleRequest.getRequestedSchedule();
         personalSchedule.setMember(scheduleRequest.getReceiver());
+        return getPersonalSchedule(personalSchedule, requestedSchedule);
+    }
+
+    private static PersonalSchedule getPersonalSchedule(PersonalSchedule personalSchedule, RequestedSchedule requestedSchedule) {
         personalSchedule.setTitle(requestedSchedule.getTitle());
         personalSchedule.setDescription(requestedSchedule.getDescription());
         personalSchedule.setColor(requestedSchedule.getColor());
         personalSchedule.setStartTime(requestedSchedule.getStartTime());
         personalSchedule.setEndTime(requestedSchedule.getEndTime());
+        personalSchedule.setLocation(requestedSchedule.getLocation());
         personalSchedule.setIsPrivate(false);
         return personalSchedule;
+    }
+
+    private static PersonalSchedule getPersonalSchedule(Member sender, RequestedSchedule schedule) {
+        PersonalSchedule personalSchedule = new PersonalSchedule();
+        personalSchedule.setMember(sender);
+        return getPersonalSchedule(personalSchedule, schedule);
     }
 
     /**
@@ -141,67 +149,32 @@ public class RequestService {
     }
 
     /**
-     * 36-3-a. 빈일정 추가 요청 등록 to GroupMember
+     * 37-3. 빈일정 추가 등록 요청 통합
      */
-    public void addScheduleRequestToGroupMember(Long groupId, Member manager, RequestedSchedule schedule, List<Member> groupMembers) {
-        // 요청자가 그룹 매너저인가
-        CoGroup group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new NoSuchElementException("그룹이 조회되지 않습니다."));
-        GroupManager findManager = groupManagerRepository.checkUserIsManager(manager.getId(), group.getId())
-                .orElseThrow(() -> new NoSuchElementException("그룹 매니저가 조회되지 않습니다."));
-        // 요청된 일정부터 저장
-        RequestedSchedule savedSchedule = requestedScheduleRepository.save(schedule);
-        // 일정 요청 목록을 만들어서 각 요청마다 요청된 일정, sender, receiver 적용
-        List<ScheduleRequest> requests = groupMembers.stream()
-                .map(groupMember -> {
-                    ScheduleRequest newRequest = new ScheduleRequest();
-                    newRequest.setSender(findManager.getGroupManager());
-                    newRequest.setRequestedSchedule(savedSchedule);
-                    newRequest.setReceiver(groupMember);
-                    return newRequest;
-                })
-                .collect(Collectors.toList());
-        // 일정 요청 목록 모두 save
-        scheduleRequestRepository.saveAll(requests);
-    }
-
-    /**
-     * 36-3-b. 빈일정 추가 요청 등록 to Friend
-     */
-    public void addScheduleRequestToFriend(Member member, RequestedSchedule schedule, List<Friend> friends) {
+    public void addScheduleRequest(Member sender, RequestedSchedule schedule, List<Member> receivers) {
         // 요청자가 회원인가
-        Member findMember = memberRepository.findById(member.getId())
+        Member findSender = memberRepository.findById(sender.getId())
                 .orElseThrow(() -> new NoSuchElementException("회원이 조회되지 않습니다."));
-
         // 요청된 일정부터 저장
         RequestedSchedule savedSchedule = requestedScheduleRepository.save(schedule);
-
-        // 저장된 일정으로 각 친구에게 요청
         List<ScheduleRequest> requests = new ArrayList<>();
-        for (Friend friend : friends) {
-            if (friend.getId() != null) { // ID가 null이 아닌 경우에만 요청 생성
-                Friend friendMember = friendRepository.findById(friend.getId())
+        for (Member receiver : receivers) {
+            if (receiver.getId() != null) { // ID가 null이 아닌 경우에만 요청 생성
+                Member findReceiver = memberRepository.findById(receiver.getId())
                         .orElseThrow(() -> new NoSuchElementException("친구가 조회되지 않습니다."));
                 ScheduleRequest newRequest = new ScheduleRequest();
-                newRequest.setSender(findMember);
+                newRequest.setSender(findSender);
                 newRequest.setRequestedSchedule(savedSchedule);
-                newRequest.setReceiver(friendMember.getOpponent());
+                newRequest.setReceiver(findReceiver);
                 newRequest.setRequestStatus(RequestStatus.PENDING);
                 requests.add(newRequest);
             }
         }
-
-        // 본인 것에도 추가
-        ScheduleRequest selfRequest = new ScheduleRequest();
-        selfRequest.setSender(findMember);
-        selfRequest.setRequestedSchedule(savedSchedule);
-        selfRequest.setReceiver(findMember);
-        selfRequest.setRequestStatus(RequestStatus.PENDING);
-        requests.add(selfRequest);
-
+        // 본인 일정에도 추가
+        PersonalSchedule personalSchedule = getPersonalSchedule(sender, schedule);
+        personalScheduleRepository.save(personalSchedule);
         scheduleRequestRepository.saveAll(requests);
     }
-
 
     /**
      * 37-1. 친구 요청 목록 조회
