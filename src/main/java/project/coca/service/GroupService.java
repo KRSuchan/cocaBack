@@ -328,6 +328,6 @@ public class GroupService {
                 .orElseThrow(() -> new NoSuchElementException("그룹이 조회되지 않습니다."));
         groupMemberRepository.checkMemberInGroup(group.getId(), member.getId())
                 .orElseThrow(() -> new NoSuchElementException("그룹의 회원이 아닙니다."));
-        return groupMemberRepository.findAllByGroupMemberAndCoGroup(member, group);
+        return groupMemberRepository.findAllByCoGroup(group);
     }
 }
