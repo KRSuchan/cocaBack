@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.coca.domain.group.CoGroup;
 import project.coca.domain.group.GroupManager;
-import project.coca.domain.group.GroupMember;
 import project.coca.domain.personal.Friend;
 import project.coca.domain.personal.Member;
 import project.coca.domain.personal.PersonalSchedule;
@@ -144,11 +143,11 @@ public class RequestService {
     /**
      * 36-3-a. 빈일정 추가 요청 등록 to GroupMember
      */
-    public void addScheduleRequestToGroupMember(Long groupId, GroupManager manager, RequestedSchedule schedule, List<GroupMember> groupMembers) {
+    public void addScheduleRequestToGroupMember(Long groupId, Member manager, RequestedSchedule schedule, List<Member> groupMembers) {
         // 요청자가 그룹 매너저인가
         CoGroup group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NoSuchElementException("그룹이 조회되지 않습니다."));
-        GroupManager findManager = groupManagerRepository.checkUserIsManager(manager.getGroupManager().getId(), group.getId())
+        GroupManager findManager = groupManagerRepository.checkUserIsManager(manager.getId(), group.getId())
                 .orElseThrow(() -> new NoSuchElementException("그룹 매니저가 조회되지 않습니다."));
         // 요청된 일정부터 저장
         RequestedSchedule savedSchedule = requestedScheduleRepository.save(schedule);
@@ -158,7 +157,7 @@ public class RequestService {
                     ScheduleRequest newRequest = new ScheduleRequest();
                     newRequest.setSender(findManager.getGroupManager());
                     newRequest.setRequestedSchedule(savedSchedule);
-                    newRequest.setReceiver(groupMember.getGroupMember());
+                    newRequest.setReceiver(groupMember);
                     return newRequest;
                 })
                 .collect(Collectors.toList());

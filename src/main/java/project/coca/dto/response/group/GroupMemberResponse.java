@@ -7,7 +7,7 @@ import project.coca.domain.group.GroupMember;
 @Builder
 @Data
 public class GroupMemberResponse {
-    private String id;
+    private String id; // 회원 id
     private String userName;
     private String profileImgPath;
 
