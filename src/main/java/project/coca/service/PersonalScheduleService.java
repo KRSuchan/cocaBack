@@ -108,6 +108,7 @@ public class PersonalScheduleService {
         foundPersonalSchedule.setEndTime(updatePersonalSchedule.getEndTime());
         foundPersonalSchedule.setColor(updatePersonalSchedule.getColor());
         foundPersonalSchedule.setIsPrivate(updatePersonalSchedule.getIsPrivate());
+        foundPersonalSchedule.setAttachments(updatePersonalSchedule.getAttachments());
 
         System.out.println("수정된 내용 반영 완료");
 

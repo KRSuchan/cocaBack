@@ -1,7 +1,10 @@
 package project.coca.controller;
 
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import project.coca.dto.request.FindEmptyScheduleRequest;
 import project.coca.dto.response.CommonSchedule;
 import project.coca.dto.response.common.ApiResponse;
@@ -20,13 +23,13 @@ public class CommonScheduleController {
 
     private final CommonScheduleService commonScheduleService;
 
-    @GetMapping("/findEmptyScheduleReq")
+    @PostMapping("/findEmptyScheduleReq")
     public ApiResponse<List<CommonSchedule>> findEmptyScheduleReq(@RequestBody FindEmptyScheduleRequest request) {
         try {
             List<CommonSchedule> result = commonScheduleService.findEmptySchedule(request);
 
             return ApiResponse.response(ResponseCode.OK, result);
-        } catch(NoSuchElementException e) {
+        } catch (NoSuchElementException e) {
             return ApiResponse.fail(ErrorCode.NOT_FOUND, "찾을 일정의 시간/날을 입력하지 않았습니다.");
         } catch (Exception e) {
             return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -38,7 +41,7 @@ public class CommonScheduleController {
         try {
             List<PersonalScheduleForEmptyScheduleResponse> result = commonScheduleService.memberScheduleReq(memberList);
             return ApiResponse.response(ResponseCode.OK, result);
-        } catch(NoSuchElementException e) {
+        } catch (NoSuchElementException e) {
             return ApiResponse.fail(ErrorCode.NOT_FOUND, "조회되지 않는 데이터가 포함되어있습니다.");
         } catch (Exception e) {
             return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
