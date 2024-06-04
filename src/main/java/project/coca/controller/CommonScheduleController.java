@@ -1,7 +1,7 @@
 package project.coca.controller;
 
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,7 +22,7 @@ public class CommonScheduleController {
 
     private final CommonScheduleService commonScheduleService;
 
-    @PostMapping("/findEmptyScheduleReq")
+    @GetMapping("/findEmptyScheduleReq")
     public ApiResponse<List<EmptySchedule>> findEmptyScheduleReq(@RequestBody FindEmptyScheduleRequest request) {
         try {
             List<EmptySchedule> result = commonScheduleService.findEmptySchedule(request);
