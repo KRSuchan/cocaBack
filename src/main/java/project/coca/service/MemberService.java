@@ -193,12 +193,14 @@ public class MemberService {
         member.setInterests(memberInterest);
 
         // 프로필 이미지 업로드
-        if (newInfo.getIsDefaultImage()) {
+        if (newInfo.getProfileImageUrl().equals(DEFAULT_PROFILE_IMAGE_PATH)) {
+            // url이 디폴트 이미지 url과 동일하면 디폴트 이미지
             member.setProfileImgPath(DEFAULT_PROFILE_IMAGE_PATH);
-        } else {
+        } else if (!newInfo.getProfileImageUrl().equals(member.getProfileImgPath())) {
+            // url이 본인이 이전과 다른 url일 경우
             URL savedUrl = s3Service.uploadProfileImage(profileImage, member.getId());
             member.setProfileImgPath(savedUrl.toString());
-        }
+        }   // url이 같으면 그냥 pass
 
         Member check = memberRepository.save(member);
         memberRepository.flush();

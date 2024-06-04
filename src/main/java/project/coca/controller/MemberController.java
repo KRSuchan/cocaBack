@@ -153,6 +153,8 @@ public class MemberController {
             MemberResponse updateResult = MemberResponse.of(memberService.memberInfoUpdate(newInfo, profileImage));
 
             return ApiResponse.response(ResponseCode.OK, updateResult);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            return ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage());
         } catch (NoSuchElementException e) {
             return ApiResponse.fail(ErrorCode.NOT_FOUND, "조회되지 않는 데이터가 포함되어있습니다.");
         } catch (Exception e) {

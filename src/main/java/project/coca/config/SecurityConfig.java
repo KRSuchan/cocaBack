@@ -52,6 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/member/validate-id").permitAll()
                         .requestMatchers("/api/jwt/reissue").permitAll()
                         .requestMatchers("/api/tag/all").permitAll()
+                        .requestMatchers("/api/member/memberInfoUpdateReq").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
