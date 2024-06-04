@@ -2,8 +2,7 @@ package project.coca.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;
-import project.coca.domain.group.GroupManager;
-import project.coca.domain.group.GroupMember;
+import project.coca.domain.personal.Member;
 import project.coca.domain.request.RequestedSchedule;
 
 import java.util.List;
@@ -12,7 +11,7 @@ import java.util.List;
 @Getter
 public class ScheduleRequestToGroupMember {
     private Long groupId;
-    private GroupManager manager;
+    private Member manager;
     private RequestedSchedule requestedSchedule;
-    private List<GroupMember> groupMembers;
+    private List<Member> groupMembers;
 }
