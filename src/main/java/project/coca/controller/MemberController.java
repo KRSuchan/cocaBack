@@ -31,6 +31,17 @@ public class MemberController {
         this.memberService = memberService;
     }
 
+    @GetMapping("/memberProfileImageUrlReq")
+    public ApiResponse<String> MemberProfileImageUrlReq(@RequestParam String memberId) {
+        try {
+            return ApiResponse.response(ResponseCode.OK, memberService.getMemberProfileUrl(memberId));
+        } catch (NoSuchElementException e) {
+            return ApiResponse.fail(ErrorCode.NOT_FOUND, "조회되지 않는 데이터가 포함되어있습니다.");
+        } catch (Exception e) {
+            return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
     /**
      * 아이디 중복 체크
      * id만 필요
