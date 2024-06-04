@@ -101,7 +101,7 @@ public class CommonScheduleService {
                 }
             }
             if (isAvailable)
-                resultSchedule.add(new CommonSchedule(startDate.atStartOfDay().plusDays(i), startDate.atTime(23, 59, 59).plusDays(duration + 1)));
+                resultSchedule.add(new CommonSchedule(startDate.atStartOfDay().plusDays(i), startDate.atStartOfDay().plusDays(duration + i)));
         }
         return resultSchedule;
     }
