@@ -55,6 +55,14 @@ public class MemberService {
         this.s3Service = s3Service;
     }
 
+    //유저프로필URL 가져오기
+    public String getMemberProfileUrl(String memberId) {
+        Member check = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("회원이 조회되지 않습니다."));
+
+        return check.getProfileImgPath();
+    }
+
     // ID 중복 확인
     public Boolean checkDuplicationId(String id) {
         if (id == null || id.isEmpty()) {
