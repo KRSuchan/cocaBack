@@ -8,7 +8,9 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import project.coca.domain.group.CoGroup;
 import project.coca.domain.personal.Member;
+import project.coca.domain.tag.Interest;
 import project.coca.domain.tag.Tag;
+import project.coca.repository.InterestRepository;
 import project.coca.repository.MemberRepository;
 import project.coca.repository.TagRepository;
 
@@ -24,9 +26,9 @@ public class InitData {
 
     @EventListener(ApplicationReadyEvent.class)
     public void initData() throws IOException {
-        log.info("데이터 초기화 시작");
-//        initService.init();
-        log.info("데이터 초기화 끝");
+        log.info("data initialize 시작");
+        initService.init();
+        log.info("data initialize 끝");
     }
 
     @RequiredArgsConstructor
@@ -35,6 +37,7 @@ public class InitData {
     public static class initService {
         private final TagRepository tagRepository;
         private final MemberRepository memberRepository;
+        private final InterestRepository interestRepository;
         private List<Member> memberList = new ArrayList<>();
         private List<CoGroup> coGroupList = new ArrayList<>();
         private List<Tag> tagList = new ArrayList<>();
@@ -50,13 +53,18 @@ public class InitData {
             for (int i = 0; i <= 9; i++) {
                 StringBuilder builder = new StringBuilder();
                 builder.append(String.valueOf(i).repeat(4));
-                initMember("tester" + builder, "tester" + builder, "테스터" + i, defaultImgPath);
+                initMember("tester" + builder, "tester" + builder, "테스터" + i, defaultImgPath, tagList.subList(0, 3));
             }
             memberList = memberRepository.findAll();
         }
 
-        private void initMember(String id, String pwd, String userName, String profileImgPath) {
+        private void initMember(String id, String pwd, String userName, String profileImgPath, List<Tag> tagList) {
             Member member = new Member(id, pwd, userName, profileImgPath);
+            List<Interest> interests = new ArrayList<>();
+            for (Tag tag : tagList) {
+                interests.add(new Interest(member, tag));
+            }
+            member.setInterests(interests);
             memberRepository.save(member);
         }
 
