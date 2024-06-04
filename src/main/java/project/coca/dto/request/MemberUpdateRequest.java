@@ -13,11 +13,10 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
-public class MemberRequest {
+public class MemberUpdateRequest {
     private String id;
     private String password;
     private String userName;
     private String profileImageUrl;
-    private Boolean isDefaultImage;
     private List<InterestForTag> interestId = new ArrayList<>();
 }

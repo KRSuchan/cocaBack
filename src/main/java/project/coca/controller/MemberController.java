@@ -7,7 +7,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import project.coca.dto.request.MemberFunctionRequest;
-import project.coca.dto.request.MemberRequest;
+import project.coca.dto.request.MemberJoinRequest;
+import project.coca.dto.request.MemberUpdateRequest;
 import project.coca.dto.response.Member.MemberResponse;
 import project.coca.dto.response.common.ApiResponse;
 import project.coca.dto.response.common.error.ErrorCode;
@@ -35,7 +36,7 @@ public class MemberController {
      * id만 필요
      */
     @PostMapping("/validate-id")
-    public ApiResponse<Boolean> checkDuplicationId(@RequestBody MemberRequest memberRequest) {
+    public ApiResponse<Boolean> checkDuplicationId(@RequestBody MemberUpdateRequest memberRequest) {
         try {
             return ApiResponse.response(ResponseCode.OK, memberService.checkDuplicationId(memberRequest.getId()));
         } catch (Exception e) {
@@ -47,7 +48,7 @@ public class MemberController {
      * 회원가입
      */
     @PostMapping(value = "/joinReq", consumes = {"multipart/form-data"})
-    public ApiResponse<MemberResponse> JoinReq(@RequestPart("data") MemberRequest joinMember,
+    public ApiResponse<MemberResponse> JoinReq(@RequestPart("data") MemberJoinRequest joinMember,
                                                @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
         try {
             MemberResponse joinResult = MemberResponse.of(memberService.memberJoin(joinMember, profileImage));
@@ -147,13 +148,15 @@ public class MemberController {
      * @body newInfo 수정 할 회원의 새 정보
      */
     @PostMapping(value = "/memberInfoUpdateReq", consumes = {"multipart/form-data"})
-    public ApiResponse<MemberResponse> MemberInfoUpdateReq(@RequestPart("data") MemberRequest newInfo,
-                                                           @RequestPart("profileImage") MultipartFile profileImage) {
+    public ApiResponse<MemberResponse> MemberInfoUpdateReq(@RequestPart("data") MemberUpdateRequest newInfo,
+                                                           @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
+        System.out.println("isNull = " + (profileImage == null));
+
         try {
             MemberResponse updateResult = MemberResponse.of(memberService.memberInfoUpdate(newInfo, profileImage));
-
             return ApiResponse.response(ResponseCode.OK, updateResult);
         } catch (IllegalArgumentException | NullPointerException e) {
+            e.printStackTrace();
             return ApiResponse.fail(ErrorCode.BAD_REQUEST, e.getMessage());
         } catch (NoSuchElementException e) {
             return ApiResponse.fail(ErrorCode.NOT_FOUND, "조회되지 않는 데이터가 포함되어있습니다.");

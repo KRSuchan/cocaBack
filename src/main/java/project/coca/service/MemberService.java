@@ -13,7 +13,8 @@ import project.coca.domain.personal.Member;
 import project.coca.domain.tag.Interest;
 import project.coca.domain.tag.Tag;
 import project.coca.dto.request.MemberFunctionRequest;
-import project.coca.dto.request.MemberRequest;
+import project.coca.dto.request.MemberJoinRequest;
+import project.coca.dto.request.MemberUpdateRequest;
 import project.coca.dto.response.tag.InterestForTag;
 import project.coca.jwt.JwtRedisService;
 import project.coca.jwt.JwtTokenProvider;
@@ -111,7 +112,7 @@ public class MemberService {
     }
 
     //회원가입
-    public Member memberJoin(MemberRequest joinMember, MultipartFile profileImage) throws IOException {
+    public Member memberJoin(MemberJoinRequest joinMember, MultipartFile profileImage) throws IOException {
         if (memberRepository.existsById(joinMember.getId()))
             throw new DuplicateKeyException("동일한 아이디의 회원이 이미 존재합니다.");
 
@@ -171,7 +172,7 @@ public class MemberService {
     }
 
     //개인정보수정 -> 개인정보조회가 선행이라 pw 확인x
-    public Member memberInfoUpdate(MemberRequest newInfo, MultipartFile profileImage) throws IOException {
+    public Member memberInfoUpdate(MemberUpdateRequest newInfo, MultipartFile profileImage) throws IOException {
         Member member = memberRepository.findById(newInfo.getId())
                 .orElseThrow(() -> new NoSuchElementException("회원이 조회되지 않습니다."));
 
@@ -191,13 +192,12 @@ public class MemberService {
         }
         //새 관심사 세팅
         member.setInterests(memberInterest);
-
         // 프로필 이미지 업로드
         if (newInfo.getProfileImageUrl().equals(DEFAULT_PROFILE_IMAGE_PATH)) {
             // url이 디폴트 이미지 url과 동일하면 디폴트 이미지
             member.setProfileImgPath(DEFAULT_PROFILE_IMAGE_PATH);
         } else if (!newInfo.getProfileImageUrl().equals(member.getProfileImgPath())) {
-            // url이 본인이 이전과 다른 url일 경우
+            // 본인의 이전 url과 다른 url일 경우
             URL savedUrl = s3Service.uploadProfileImage(profileImage, member.getId());
             member.setProfileImgPath(savedUrl.toString());
         }   // url이 같으면 그냥 pass
