@@ -108,13 +108,16 @@ public class PersonalScheduleService {
         foundPersonalSchedule.setEndTime(updatePersonalSchedule.getEndTime());
         foundPersonalSchedule.setColor(updatePersonalSchedule.getColor());
         foundPersonalSchedule.setIsPrivate(updatePersonalSchedule.getIsPrivate());
-        
+
         // 기존 첨부 파일 삭제
         personalScheduleAttachmentRepository.deleteAllByPersonalSchedule(foundPersonalSchedule);
-        foundPersonalSchedule.setAttachments(updatePersonalSchedule.getAttachments());
+        personalScheduleAttachmentRepository.flush();
 
         System.out.println("수정된 내용 반영 완료");
-
+        System.out.println(foundPersonalSchedule.getAttachments().size());
+        System.out.println(updatePersonalSchedule.getAttachments().size());
+        foundPersonalSchedule.setAttachments(updatePersonalSchedule.getAttachments());
+        System.out.println("받아온 첨부파일 " + foundPersonalSchedule.getAttachments().size());
 
         // 새로운 첨부 파일 추가
         if (attachments != null && attachments.length > 0) { // null 체크 추가
@@ -126,7 +129,11 @@ public class PersonalScheduleService {
         }
 
         System.out.println("첨부파일 반영 완료");
-
+        System.out.println("총 저장된 첨부파일 " + foundPersonalSchedule.getAttachments().size());
+        for (PersonalScheduleAttachment attachment : foundPersonalSchedule.getAttachments()) {
+            attachment.setPersonalSchedule(foundPersonalSchedule);
+        }
+//        System.out.println(foundPersonalSchedule.getAttachments().get(0).getPersonalSchedule().getId());
         // 수정된 개인 일정 저장
         personalScheduleRepository.save(foundPersonalSchedule);
         return foundPersonalSchedule;
@@ -140,6 +147,7 @@ public class PersonalScheduleService {
         personalScheduleAttachment.setFilePath(savedUrl.toString());
         personalScheduleAttachment.setPersonalSchedule(findPersonalSchedule);
         findPersonalSchedule.getAttachments().add(personalScheduleAttachment);
+        System.out.println("총 저장된 첨부파일 " + findPersonalSchedule.getAttachments().size());
     }
 
     /**
