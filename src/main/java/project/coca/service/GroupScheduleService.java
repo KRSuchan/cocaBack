@@ -168,9 +168,11 @@ public class GroupScheduleService {
             for (GroupScheduleAttachment attachment : attachmentsCopy) {
                 if (!newAttachMD5s.contains(attachment.getFileMd5())) {
                     groupScheduleAttachmentRepository.delete(attachment);
+                    s3Service.deleteS3File(attachment.getFilePath());
                     updateSchedule.removeAttachment(attachment);
                 }
             }
+            groupScheduleAttachmentRepository.flush();
         }
 
         //기존거에 없음 -> 기존거에 새로운거 추가
@@ -184,6 +186,7 @@ public class GroupScheduleService {
             }
         }
 
+        updateSchedule.setGroupScheduleAttachments(attachmentsCopy);
         return groupScheduleRepository.save(updateSchedule);
     }
 
