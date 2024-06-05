@@ -74,7 +74,7 @@ public class CommonScheduleService {
         Arrays.fill(daySlot, true);
 
         for(String memberId : members) {
-            LocalDateTime startTime = startDate.atStartOfDay();
+            LocalDateTime startTime = startDate.atTime(0, 0, 1);
             LocalDateTime endTime = startDate.atTime(23, 59, 59);
 
             for(int i = 0; i < period; i++) {
@@ -108,7 +108,7 @@ public class CommonScheduleService {
 
     private List<CommonSchedule> interval(LocalDateTime startTime, LocalDateTime endTime, int duration, List<String> members) {
         List<Interval> combined = new ArrayList<>();
-        final int tineSlot = 60;
+        final int tineSlot = 10;
 
         for(String memberId : members) {
             List<PersonalSchedule> personalSchedules = personalScheduleRepository.findPersonalScheduleByDateRange(memberId, startTime, endTime);
