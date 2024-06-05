@@ -148,16 +148,17 @@ public class GroupScheduleService {
 
         List<String> existAttachMD5s = new ArrayList<>();
         if (updateSchedule.getGroupScheduleAttachments() != null && updateSchedule.getGroupScheduleAttachments().size() > 0) {
-            for (GroupScheduleAttachment attachment : updateSchedule.getGroupScheduleAttachments())
+            for (GroupScheduleAttachment attachment : updateSchedule.getGroupScheduleAttachments()) {
                 existAttachMD5s.add(attachment.getFileMd5());
+            }
         }
 
         List<String> newAttachMD5s = new ArrayList<>();
         if (files != null && files.length > 0) {
-            for (MultipartFile multipartFile : files)
-                if (multipartFile != null) {
+            for (MultipartFile multipartFile : files) {
+                if (multipartFile != null)
                     newAttachMD5s.add(generateFileMd5(multipartFile));
-                }
+            }
         }
 
         //복사해서 바꿔야 오류가 안납니다...
@@ -167,11 +168,13 @@ public class GroupScheduleService {
         if (attachmentsCopy != null && attachmentsCopy.size() > 0) {
             for (GroupScheduleAttachment attachment : attachmentsCopy) {
                 if (!newAttachMD5s.contains(attachment.getFileMd5())) {
-                    groupScheduleAttachmentRepository.delete(attachment);
                     s3Service.deleteS3File(attachment.getFilePath());
                     updateSchedule.removeAttachment(attachment);
+                    attachment.setGroupSchedule(null);
+                    groupScheduleAttachmentRepository.delete(attachment);
                 }
             }
+            System.out.println("삭제삭제요");
             groupScheduleAttachmentRepository.flush();
         }
 
@@ -180,13 +183,10 @@ public class GroupScheduleService {
             for (int i = 0; i < newAttachMD5s.size(); i++) {
                 if (!existAttachMD5s.contains(newAttachMD5s.get(i))) {
                     GroupScheduleAttachment newAttach = generateAttachment(files[i], updateSchedule, i);
-                    groupScheduleAttachmentRepository.save(newAttach);
                     updateSchedule.addAttachment(newAttach);
                 }
             }
         }
-
-        updateSchedule.setGroupScheduleAttachments(attachmentsCopy);
         return groupScheduleRepository.save(updateSchedule);
     }
 
@@ -225,6 +225,9 @@ public class GroupScheduleService {
      멤버가 그룹 내의 회원인지 확인 -> 그룹의 일정을 멤버 개인 캘린더에 저장
     */
     public PersonalSchedule setGroupScheduleToPersonalSchedule(Long groupId, Long scheduleId, String memberId) {
+        CoGroup group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new NoSuchElementException("그룹이 존재하지 않습니다."));
+
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("회원이 존재하지 않습니다."));
 
@@ -237,7 +240,7 @@ public class GroupScheduleService {
         PersonalSchedule personalSchedule = new PersonalSchedule();
 
         personalSchedule.setMember(member);
-        personalSchedule.setTitle(groupSchedule.getTitle());
+        personalSchedule.setTitle(group.getName() + "그룹의 일정 - " + groupSchedule.getTitle());
         personalSchedule.setDescription(groupSchedule.getDescription());
         personalSchedule.setLocation(groupSchedule.getLocation());
         personalSchedule.setStartTime(groupSchedule.getStartTime());
