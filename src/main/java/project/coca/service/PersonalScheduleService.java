@@ -108,12 +108,13 @@ public class PersonalScheduleService {
         foundPersonalSchedule.setEndTime(updatePersonalSchedule.getEndTime());
         foundPersonalSchedule.setColor(updatePersonalSchedule.getColor());
         foundPersonalSchedule.setIsPrivate(updatePersonalSchedule.getIsPrivate());
+        
+        // 기존 첨부 파일 삭제
+        personalScheduleAttachmentRepository.deleteAllByPersonalSchedule(foundPersonalSchedule);
         foundPersonalSchedule.setAttachments(updatePersonalSchedule.getAttachments());
 
         System.out.println("수정된 내용 반영 완료");
 
-        // 기존 첨부 파일 삭제
-        personalScheduleAttachmentRepository.deleteAllByPersonalSchedule(foundPersonalSchedule);
 
         // 새로운 첨부 파일 추가
         if (attachments != null && attachments.length > 0) { // null 체크 추가
