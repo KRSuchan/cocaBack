@@ -17,7 +17,6 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -148,17 +147,16 @@ public class GroupScheduleService {
 
         List<String> existAttachMD5s = new ArrayList<>();
         if (updateSchedule.getGroupScheduleAttachments() != null && updateSchedule.getGroupScheduleAttachments().size() > 0) {
-            for (GroupScheduleAttachment attachment : updateSchedule.getGroupScheduleAttachments()) {
+            for (GroupScheduleAttachment attachment : updateSchedule.getGroupScheduleAttachments())
                 existAttachMD5s.add(attachment.getFileMd5());
-            }
         }
 
         List<String> newAttachMD5s = new ArrayList<>();
         if (files != null && files.length > 0) {
-            for (MultipartFile multipartFile : files) {
-                if (multipartFile != null)
+            for (MultipartFile multipartFile : files)
+                if (multipartFile != null) {
                     newAttachMD5s.add(generateFileMd5(multipartFile));
-            }
+                }
         }
 
         //복사해서 바꿔야 오류가 안납니다...
