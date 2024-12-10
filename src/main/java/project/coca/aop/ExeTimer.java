@@ -1,4 +1,4 @@
-package project.coca.v2.aop;
+package project.coca.aop;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

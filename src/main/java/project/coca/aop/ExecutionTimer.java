@@ -1,4 +1,4 @@
-package project.coca.v2.aop;
+package project.coca.aop;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -15,7 +15,7 @@ import org.springframework.util.StopWatch;
 public class ExecutionTimer {
 
     // 조인포인트를 어노테이션으로 설정d
-    @Pointcut("@annotation(project.coca.v2.aop.ExeTimer)")
+    @Pointcut("@annotation(project.coca.aop.ExeTimer)")
     private void timer() {
     }
 
