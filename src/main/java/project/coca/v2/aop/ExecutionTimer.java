@@ -15,7 +15,7 @@ import org.springframework.util.StopWatch;
 public class ExecutionTimer {
 
     // 조인포인트를 어노테이션으로 설정d
-    @Pointcut("@annotation(project.coca.aop.ExeTimer)")
+    @Pointcut("@annotation(project.coca.v2.aop.ExeTimer)")
     private void timer() {
     }
 
