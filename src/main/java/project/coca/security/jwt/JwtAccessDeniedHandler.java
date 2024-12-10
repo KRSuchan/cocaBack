@@ -1,4 +1,4 @@
-package project.coca.v1.jwt;
+package project.coca.security.jwt;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

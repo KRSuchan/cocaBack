@@ -1,4 +1,4 @@
-package project.coca.v1.jwt;
+package project.coca.security.jwt;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;

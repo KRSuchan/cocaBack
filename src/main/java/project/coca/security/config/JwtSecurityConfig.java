@@ -1,12 +1,12 @@
-package project.coca.v1.config;
+package project.coca.security.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import project.coca.v1.jwt.JwtFilter;
-import project.coca.v1.jwt.JwtTokenProvider;
+import project.coca.security.jwt.JwtFilter;
+import project.coca.security.jwt.JwtTokenProvider;
 
 /**
  * JwtTokenProvider과 JwtFilter를 SecurityConfig에 적용

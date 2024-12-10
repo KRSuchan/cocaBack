@@ -1,4 +1,4 @@
-package project.coca.v1.config;
+package project.coca.security.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

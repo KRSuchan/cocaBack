@@ -1,4 +1,4 @@
-package project.coca.v1.config;
+package project.coca.security.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -13,10 +13,10 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import project.coca.v1.jwt.JwtAccessDeniedHandler;
-import project.coca.v1.jwt.JwtAuthenticationEntryPoint;
-import project.coca.v1.jwt.JwtFilter;
-import project.coca.v1.jwt.JwtTokenProvider;
+import project.coca.security.jwt.JwtAccessDeniedHandler;
+import project.coca.security.jwt.JwtAuthenticationEntryPoint;
+import project.coca.security.jwt.JwtFilter;
+import project.coca.security.jwt.JwtTokenProvider;
 
 @Configuration
 @RequiredArgsConstructor

@@ -5,6 +5,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import project.coca.security.jwt.TokenDto;
 import project.coca.v1.dto.request.MemberFunctionRequest;
 import project.coca.v1.dto.request.MemberJoinRequest;
 import project.coca.v1.dto.request.MemberUpdateRequest;
@@ -13,7 +14,6 @@ import project.coca.v1.dto.response.common.ApiResponse;
 import project.coca.v1.dto.response.common.error.ErrorCode;
 import project.coca.v1.dto.response.common.success.ResponseCode;
 import project.coca.v1.dto.response.tag.InterestForTag;
-import project.coca.v1.jwt.TokenDto;
 import project.coca.v1.service.MemberService;
 
 import javax.naming.AuthenticationException;

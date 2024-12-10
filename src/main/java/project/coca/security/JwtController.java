@@ -1,4 +1,4 @@
-package project.coca.v1.controller;
+package project.coca.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import project.coca.security.jwt.JwtService;
+import project.coca.security.jwt.TokenDto;
 import project.coca.v1.dto.response.common.ApiResponse;
 import project.coca.v1.dto.response.common.error.ErrorCode;
 import project.coca.v1.dto.response.common.success.ResponseCode;
-import project.coca.v1.jwt.JwtService;
-import project.coca.v1.jwt.TokenDto;
 
 @Slf4j
 @RestController
