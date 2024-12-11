@@ -3,7 +3,7 @@ package project.coca.v1.dto.response.Member;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import project.coca.v1.domain.personal.Member;
+import project.coca.domain.personal.Member;
 import project.coca.v1.dto.response.tag.InterestForTag;
 
 import java.util.ArrayList;

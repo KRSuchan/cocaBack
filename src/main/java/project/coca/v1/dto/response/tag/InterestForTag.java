@@ -3,7 +3,7 @@ package project.coca.v1.dto.response.tag;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import project.coca.v1.domain.tag.Interest;
+import project.coca.domain.tag.Interest;
 
 @Builder
 @Getter

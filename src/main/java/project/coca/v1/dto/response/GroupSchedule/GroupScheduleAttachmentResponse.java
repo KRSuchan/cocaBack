@@ -3,7 +3,7 @@ package project.coca.v1.dto.response.GroupSchedule;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import project.coca.v1.domain.group.GroupScheduleAttachment;
+import project.coca.domain.group.GroupScheduleAttachment;
 
 @Builder
 @Getter

@@ -2,11 +2,11 @@ package project.coca.v1.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;
-import project.coca.v1.domain.group.CoGroup;
-import project.coca.v1.domain.group.GroupManager;
-import project.coca.v1.domain.group.GroupNotice;
-import project.coca.v1.domain.personal.Member;
-import project.coca.v1.domain.tag.Tag;
+import project.coca.domain.group.CoGroup;
+import project.coca.domain.group.GroupManager;
+import project.coca.domain.group.GroupNotice;
+import project.coca.domain.personal.Member;
+import project.coca.domain.tag.Tag;
 
 import java.util.List;
 

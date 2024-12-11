@@ -1,4 +1,4 @@
-package project.coca.v1.domain.request;
+package project.coca.domain.request;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -7,8 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import project.coca.v1.domain.group.CoGroup;
-import project.coca.v1.domain.personal.Member;
+import project.coca.domain.personal.Member;
 
 import java.time.LocalDateTime;
 
@@ -18,10 +17,10 @@ import java.time.LocalDateTime;
 @ToString
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)  // 감사 기능 활성화
-public class GroupRequest {
+public class ScheduleRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "GROUP_REQUEST_ID")
+    @Column(name = "SCHEDULE_REQUEST_ID")
     private Long id;
     @Enumerated(EnumType.STRING)
     private RequestStatus requestStatus;
@@ -30,14 +29,14 @@ public class GroupRequest {
     private LocalDateTime createdDate = LocalDateTime.now();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "GROUP_ID", nullable = false)
-    private CoGroup coGroup;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SENDER_ID", nullable = false)
     private Member sender;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "RECEIVER_ID", nullable = false)
     private Member receiver;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "REQUESTED_SCHEDULE_ID", nullable = false)
+    private RequestedSchedule requestedSchedule;
 }

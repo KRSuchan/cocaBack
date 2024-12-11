@@ -2,9 +2,9 @@ package project.coca.v1.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import project.coca.v1.domain.personal.Friend;
-import project.coca.v1.domain.personal.Member;
-import project.coca.v1.domain.personal.PersonalSchedule;
+import project.coca.domain.personal.Friend;
+import project.coca.domain.personal.Member;
+import project.coca.domain.personal.PersonalSchedule;
 import project.coca.v1.repository.FriendRepository;
 import project.coca.v1.repository.MemberRepository;
 

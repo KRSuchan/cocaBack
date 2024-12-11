@@ -2,7 +2,7 @@ package project.coca.v1.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;
-import project.coca.v1.domain.request.RequestStatus;
+import project.coca.domain.request.RequestStatus;
 
 @Setter
 @Getter

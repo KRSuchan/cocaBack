@@ -2,7 +2,7 @@ package project.coca.v1.dto.response.personalSchedule;
 
 import lombok.Builder;
 import lombok.Data;
-import project.coca.v1.domain.personal.PersonalScheduleAttachment;
+import project.coca.domain.personal.PersonalScheduleAttachment;
 
 @Data
 @Builder

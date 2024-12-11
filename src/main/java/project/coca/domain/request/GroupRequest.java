@@ -1,4 +1,4 @@
-package project.coca.v1.domain.request;
+package project.coca.domain.request;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -7,7 +7,8 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import project.coca.v1.domain.personal.Member;
+import project.coca.domain.group.CoGroup;
+import project.coca.domain.personal.Member;
 
 import java.time.LocalDateTime;
 
@@ -17,16 +18,20 @@ import java.time.LocalDateTime;
 @ToString
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)  // 감사 기능 활성화
-public class FriendRequest {
+public class GroupRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "FRIEND_REQUEST_ID")
+    @Column(name = "GROUP_REQUEST_ID")
     private Long id;
     @Enumerated(EnumType.STRING)
     private RequestStatus requestStatus;
     @CreatedDate
     @Column(updatable = false, name = "CREATED_AT")
     private LocalDateTime createdDate = LocalDateTime.now();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "GROUP_ID", nullable = false)
+    private CoGroup coGroup;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SENDER_ID", nullable = false)

@@ -1,7 +1,7 @@
 package project.coca.v1.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import project.coca.v1.domain.tag.Tag;
+import project.coca.domain.tag.Tag;
 
 import java.util.Optional;
 

@@ -7,7 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import project.coca.v1.domain.personal.Member;
+import project.coca.domain.personal.Member;
 import project.coca.v1.repository.MemberRepository;
 
 @Service

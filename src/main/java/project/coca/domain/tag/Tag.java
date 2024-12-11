@@ -1,4 +1,4 @@
-package project.coca.v1.domain.tag;
+package project.coca.domain.tag;
 
 import jakarta.persistence.*;
 import lombok.*;

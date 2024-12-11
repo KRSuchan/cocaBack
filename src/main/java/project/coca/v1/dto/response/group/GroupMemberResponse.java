@@ -2,7 +2,7 @@ package project.coca.v1.dto.response.group;
 
 import lombok.Builder;
 import lombok.Data;
-import project.coca.v1.domain.group.GroupMember;
+import project.coca.domain.group.GroupMember;
 
 @Builder
 @Data

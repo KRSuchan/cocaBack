@@ -1,4 +1,4 @@
-package project.coca.v1.domain.request;
+package project.coca.domain.request;
 
 public enum RequestStatus {
     PENDING,

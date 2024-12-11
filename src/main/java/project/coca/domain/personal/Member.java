@@ -1,17 +1,17 @@
-package project.coca.v1.domain.personal;
+package project.coca.domain.personal;
 
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import project.coca.v1.domain.group.CoGroup;
-import project.coca.v1.domain.group.GroupManager;
-import project.coca.v1.domain.group.GroupMember;
-import project.coca.v1.domain.request.FriendRequest;
-import project.coca.v1.domain.request.GroupRequest;
-import project.coca.v1.domain.request.ScheduleRequest;
-import project.coca.v1.domain.tag.Interest;
+import project.coca.domain.group.CoGroup;
+import project.coca.domain.group.GroupManager;
+import project.coca.domain.group.GroupMember;
+import project.coca.domain.request.FriendRequest;
+import project.coca.domain.request.GroupRequest;
+import project.coca.domain.request.ScheduleRequest;
+import project.coca.domain.tag.Interest;
 
 import java.util.ArrayList;
 import java.util.List;

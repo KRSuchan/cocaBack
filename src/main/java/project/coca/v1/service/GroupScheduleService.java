@@ -5,10 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import project.coca.v1.domain.group.*;
-import project.coca.v1.domain.personal.Member;
-import project.coca.v1.domain.personal.PersonalSchedule;
-import project.coca.v1.domain.personal.PersonalScheduleAttachment;
+import project.coca.domain.group.*;
+import project.coca.domain.personal.Member;
+import project.coca.domain.personal.PersonalSchedule;
+import project.coca.domain.personal.PersonalScheduleAttachment;
 import project.coca.v1.dto.request.GroupScheduleRequest;
 import project.coca.v1.repository.*;
 

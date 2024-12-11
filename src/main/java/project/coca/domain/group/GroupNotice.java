@@ -1,4 +1,4 @@
-package project.coca.v1.domain.group;
+package project.coca.domain.group;
 
 import jakarta.persistence.*;
 import lombok.Getter;

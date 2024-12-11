@@ -1,28 +1,33 @@
-package project.coca.v1.domain.tag;
+package project.coca.domain.tag;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import project.coca.v1.domain.group.CoGroup;
+import project.coca.domain.personal.Member;
 
 @Getter
 @Setter
 @Entity
 @ToString
 @NoArgsConstructor
-public class GroupTag {
+public class Interest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "GROUP_TAG_ID")
+    @Column(name = "INTEREST_ID")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "GROUP_ID", nullable = false)
-    private CoGroup coGroup;
+    @JoinColumn(name = "MEMBER_ID", nullable = false)
+    private Member member;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TAG_ID", nullable = false)
     private Tag tag;
+
+    public Interest(Member member, Tag tag) {
+        this.member = member;
+        this.tag = tag;
+    }
 }

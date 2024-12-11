@@ -2,8 +2,8 @@ package project.coca.v1.dto.response.request;
 
 import lombok.Builder;
 import lombok.Data;
-import project.coca.v1.domain.request.RequestStatus;
-import project.coca.v1.domain.request.ScheduleRequest;
+import project.coca.domain.request.RequestStatus;
+import project.coca.domain.request.ScheduleRequest;
 
 import java.time.LocalDateTime;
 

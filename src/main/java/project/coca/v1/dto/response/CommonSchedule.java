@@ -2,7 +2,7 @@ package project.coca.v1.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
-import project.coca.v1.domain.personal.PersonalSchedule;
+import project.coca.domain.personal.PersonalSchedule;
 
 import java.time.LocalDateTime;
 

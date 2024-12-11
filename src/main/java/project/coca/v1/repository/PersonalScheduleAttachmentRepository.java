@@ -1,8 +1,8 @@
 package project.coca.v1.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import project.coca.v1.domain.personal.PersonalSchedule;
-import project.coca.v1.domain.personal.PersonalScheduleAttachment;
+import project.coca.domain.personal.PersonalSchedule;
+import project.coca.domain.personal.PersonalScheduleAttachment;
 
 import java.util.List;
 

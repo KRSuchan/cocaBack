@@ -1,9 +1,9 @@
 package project.coca.v1.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import project.coca.v1.domain.personal.Member;
-import project.coca.v1.domain.request.FriendRequest;
-import project.coca.v1.domain.request.RequestStatus;
+import project.coca.domain.personal.Member;
+import project.coca.domain.request.FriendRequest;
+import project.coca.domain.request.RequestStatus;
 
 import java.util.List;
 import java.util.Optional;

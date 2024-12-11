@@ -2,9 +2,9 @@ package project.coca.v1.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import project.coca.v1.domain.group.CoGroup;
-import project.coca.v1.domain.group.GroupMember;
-import project.coca.v1.domain.personal.Member;
+import project.coca.domain.group.CoGroup;
+import project.coca.domain.group.GroupMember;
+import project.coca.domain.personal.Member;
 
 import java.util.List;
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package project.coca.v1.domain.personal;
+package project.coca.domain.personal;
 
 import jakarta.persistence.*;
 import lombok.Getter;

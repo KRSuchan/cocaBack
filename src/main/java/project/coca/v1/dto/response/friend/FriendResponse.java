@@ -2,7 +2,7 @@ package project.coca.v1.dto.response.friend;
 
 import lombok.Builder;
 import lombok.Data;
-import project.coca.v1.domain.personal.Friend;
+import project.coca.domain.personal.Friend;
 
 @Builder
 @Data

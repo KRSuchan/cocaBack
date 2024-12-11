@@ -1,13 +1,13 @@
-package project.coca.v1.domain.group;
+package project.coca.domain.group;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import project.coca.v1.domain.personal.Member;
-import project.coca.v1.domain.request.GroupRequest;
-import project.coca.v1.domain.tag.GroupTag;
+import project.coca.domain.personal.Member;
+import project.coca.domain.request.GroupRequest;
+import project.coca.domain.tag.GroupTag;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import project.coca.v1.domain.tag.Tag;
+import project.coca.domain.tag.Tag;
 import project.coca.v1.dto.response.common.ApiResponse;
 import project.coca.v1.dto.response.common.success.ResponseCode;
 import project.coca.v1.dto.response.tag.TagResponse;

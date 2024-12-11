@@ -2,7 +2,7 @@ package project.coca.v1.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import project.coca.v1.domain.group.GroupSchedule;
+import project.coca.domain.group.GroupSchedule;
 
 import java.time.LocalDateTime;
 import java.util.List;

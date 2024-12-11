@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import project.coca.v1.domain.group.GroupScheduleAttachment;
+import project.coca.domain.group.GroupScheduleAttachment;
 
 import java.time.LocalDateTime;
 import java.util.List;

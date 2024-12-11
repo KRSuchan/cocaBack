@@ -2,9 +2,9 @@ package project.coca.v1.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;
-import project.coca.v1.domain.personal.Friend;
-import project.coca.v1.domain.personal.Member;
-import project.coca.v1.domain.request.RequestedSchedule;
+import project.coca.domain.personal.Friend;
+import project.coca.domain.personal.Member;
+import project.coca.domain.request.RequestedSchedule;
 
 import java.util.List;
 

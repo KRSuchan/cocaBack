@@ -2,7 +2,7 @@ package project.coca.v1.dto.response.tag;
 
 import lombok.Builder;
 import lombok.Data;
-import project.coca.v1.domain.tag.Tag;
+import project.coca.domain.tag.Tag;
 
 @Data
 @Builder
