@@ -1,8 +1,9 @@
 package project.coca.security.jwt;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,123 +24,84 @@ import java.util.Date;
 @RequiredArgsConstructor
 @Slf4j
 public class JwtTokenProvider {
-    private final RedisTemplate<String, String> redisTemplate;
-    private final Long DEFAULT_ACCESS_EXPIRATION_TIME = 1000L * 60 * 60; // 60분 (ms * 초 * 분 * 시간)
-    private final Long DEFAULT_REFRESH_EXPIRATION_TIME = 1000L * 60 * 60 * 3; // 3시간 (ms * 초 * 분 * 시간)
+    private static final Long DEFAULT_ACCESS_EXPIRATION_TIME = 1000L * 60 * 60; // 1시간
+    private static final Long DEFAULT_REFRESH_EXPIRATION_TIME = 1000L * 60 * 60 * 3; // 3시간
 
-    private final Key key;
+    private final RedisTemplate<String, String> redisTemplate;
     private final JwtRedisService jwtRedisService;
-    private UserDetailsService userDetailsService;
+    private final Key key;
+    private final UserDetailsService userDetailsService;
 
     @Autowired
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey,
-                            RedisTemplate<String, String> redisTemplate, JwtRedisService jwtRedisService,
+                            RedisTemplate<String, String> redisTemplate,
+                            JwtRedisService jwtRedisService,
                             UserDetailsService userDetailsService) {
         this.redisTemplate = redisTemplate;
         this.jwtRedisService = jwtRedisService;
         this.userDetailsService = userDetailsService;
-        byte[] keyBytes = Base64.getDecoder().decode(secretKey);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
+
+        try {
+            byte[] keyBytes = Base64.getDecoder().decode(secretKey);
+            this.key = Keys.hmacShaKeyFor(keyBytes);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException("Invalid JWT secret key", e);
+        }
     }
 
-    /**
-     * 토큰 생성
-     */
-    public String generateToken(Authentication authentication, long duration) {
-        Claims claims = Jwts.claims().setSubject(authentication.getName());
+    public String createAccessToken(Authentication authentication) {
+        return generateToken(authentication.getName(), DEFAULT_ACCESS_EXPIRATION_TIME);
+    }
+
+    public String createRefreshToken(String username) {
+        String refreshToken = generateToken(username, DEFAULT_REFRESH_EXPIRATION_TIME);
+        try {
+            jwtRedisService.setRedisTemplate(username, refreshToken, DEFAULT_REFRESH_EXPIRATION_TIME);
+        } catch (Exception e) {
+            log.error("Redis operation failed: {}", e.getMessage());
+        }
+        return refreshToken;
+    }
+
+    public String generateToken(String subject, long duration) {
         Date now = new Date();
         Date expireDate = new Date(now.getTime() + duration);
 
         return Jwts.builder()
-                .setClaims(claims)
+                .setSubject(subject)
                 .setIssuedAt(now)
                 .setExpiration(expireDate)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    /**
-     * Access 토큰 생성
-     */
-    public String createAccessToken(Authentication authentication) {
-        return generateToken(authentication, DEFAULT_ACCESS_EXPIRATION_TIME);
+    public boolean validateToken(String token, HttpServletRequest request) {
+        try {
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return true;
+        } catch (JwtException e) {
+            log.info("JWT validation failed: {}", e.getMessage());
+            request.setAttribute("exception", e.getClass().getSimpleName());
+        }
+        return false;
     }
 
-    /**
-     * Refresh 토큰 생성
-     */
-    public String createRefreshToken(Authentication authentication) {
-        String refreshToken = generateToken(authentication, DEFAULT_REFRESH_EXPIRATION_TIME);
-        // redis에 저장
-        jwtRedisService.setRedisTemplate(authentication.getName(), refreshToken, DEFAULT_REFRESH_EXPIRATION_TIME);
-        return refreshToken;
-    }
-
-    /**
-     * 토큰으로부터 클레임을 만들고, 이를 통해 User 객체 생성해 Authentication 객체 반환
-     */
     public Authentication getAuthentication(String token) {
-        String userPrincipal = Jwts.parserBuilder()
+        String username = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody().getSubject();
-        UserDetails userDetails = userDetailsService.loadUserByUsername(userPrincipal);
 
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
-    /**
-     * http 헤더로부터 bearer 토큰을 가져옴.
-     */
-    public String resolveToken(HttpServletRequest req) {
-        String bearerToken = req.getHeader("Authorization");
-        System.out.println("bearerToken = " + bearerToken);
+    public String resolveToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
         return null;
-    }
-
-    public String generateRefreshToken(String username) {
-        return Jwts.builder()
-                .setSubject(username)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + DEFAULT_REFRESH_EXPIRATION_TIME))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-    }
-
-    /**
-     * Access 토큰을 검증
-     */
-    public boolean validateToken(String token, HttpServletRequest request) throws JwtException {
-        System.out.println("token: " + token);
-        try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            return true;
-        } catch (SignatureException e) {
-            log.info("Invalid JWT Signature");
-            request.setAttribute("exception", "invalidSignature");
-        } catch (MalformedJwtException e) {
-            log.info("Invalid JWT Token");
-            request.setAttribute("exception", "invalidJwt");
-        } catch (ExpiredJwtException e) {
-            log.info("Expired JWT Token");
-            request.setAttribute("exception", "expiredJwt");
-        } catch (UnsupportedJwtException e) {
-            log.info("Unsupported JWT Exception");
-            request.setAttribute("exception", "unsupportedJwt");
-        } catch (IllegalArgumentException e) {
-            log.info("JWT claims string is empty");
-            request.setAttribute("exception", "claimsEmpty");
-        } catch (NullPointerException e) {
-            log.info("JWT claims string is null");
-            request.setAttribute("exception", "nullToken");
-        } catch (Exception e) {
-            log.info("Internal Server Exception");
-            request.setAttribute("exception", "internalServerException");
-        }
-        return false;
     }
 }

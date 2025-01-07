@@ -22,7 +22,7 @@ public class JwtService {
         // 토큰 재발행
         TokenDto tokenDto = new TokenDto(
                 jwtTokenProvider.createAccessToken(authentication),
-                jwtTokenProvider.createRefreshToken(authentication)
+                jwtTokenProvider.createRefreshToken(authentication.getName())
         );
 
         return tokenDto;

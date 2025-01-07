@@ -16,6 +16,7 @@ import java.io.IOException;
 @Component
 @Slf4j
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
     @Override
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
@@ -28,12 +29,12 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         }
 
         ApiResponse<?> apiResponse = switch (exceptionType) {
-            case "invalidSignature" -> ApiResponse.fail(ErrorCode.BAD_REQUEST, "invalid_signature");
-            case "invalidJwt" -> ApiResponse.fail(ErrorCode.BAD_REQUEST, "invalid_jwt");
-            case "unsupportedJwt" -> ApiResponse.fail(ErrorCode.BAD_REQUEST, "unsupported_jwt");
-            case "expiredJwt" -> ApiResponse.fail(ErrorCode.UNAUTHORIZED, "expired_jwt");
-            case "nullToken" -> ApiResponse.fail(ErrorCode.BAD_REQUEST, "null_token");
-            default -> ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, exceptionType);
+            case "invalidSignature" -> ApiResponse.fail(ErrorCode.BAD_REQUEST, "Invalid signature");
+            case "invalidJwt" -> ApiResponse.fail(ErrorCode.BAD_REQUEST, "Invalid JWT token");
+            case "unsupportedJwt" -> ApiResponse.fail(ErrorCode.BAD_REQUEST, "Unsupported JWT token");
+            case "expiredJwt" -> ApiResponse.fail(ErrorCode.UNAUTHORIZED, "Expired JWT token");
+            case "nullToken" -> ApiResponse.fail(ErrorCode.BAD_REQUEST, "JWT token is missing");
+            default -> ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error occurred");
         };
 
         log.error("Authentication error occurred: {}", exceptionType, authException);
