@@ -33,33 +33,35 @@ public class JwtFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         String token = jwtTokenProvider.resolveToken(request);
         try {
-            // 토큰 로그 출력 (디버깅용)
-            if (token == null) {
-                log.warn("JWT token is missing in the request");
-            } else {
-                log.info("JWT token extracted: {}", token);
+            if (token == null || !token.startsWith("Bearer ")) {
+                log.warn("Invalid Authorization header format");
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"error\": \"Invalid Authorization header\"}");
+                return;
             }
+            token = token.substring(7);
 
-            // 토큰이 유효한 경우 SecurityContext에 인증 정보 저장
-            if (token != null && jwtTokenProvider.validateToken(token, request)) {
+            if (jwtTokenProvider.validateToken(token, request)) {
                 Authentication auth = jwtTokenProvider.getAuthentication(token);
-                log.info("Authentication success: {}", auth);
+                log.info("Authentication success for user: {}", auth.getName());
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
         } catch (RedisConnectionFailureException e) {
             log.error("Redis connection failure: {}", e.getMessage(), e);
             SecurityContextHolder.clearContext();
-            throw e; // Redis 관련 문제를 상위로 전달
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write("{\"error\": \"Redis connection failure\"}");
+            return;
         } catch (Exception e) {
             log.error("Unexpected error during JWT processing: {}", e.getMessage(), e);
             SecurityContextHolder.clearContext();
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 상태 설정
-            response.getWriter().write("Invalid or missing JWT token");
-            return; // 요청을 중단
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("{\"error\": \"Invalid or missing JWT token\"}");
+            return;
         }
 
-        // 필터 체인 진행
         filterChain.doFilter(request, response);
     }
+
 
 }
