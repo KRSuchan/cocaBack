@@ -56,7 +56,7 @@ public class JwtTokenProvider {
     public String createRefreshToken(String username) {
         String refreshToken = generateToken(username, DEFAULT_REFRESH_EXPIRATION_TIME);
         try {
-            jwtRedisService.setRedisTemplate(username, refreshToken, DEFAULT_REFRESH_EXPIRATION_TIME);
+            jwtRedisService.setToken(username, refreshToken, DEFAULT_REFRESH_EXPIRATION_TIME);
         } catch (Exception e) {
             log.error("Redis operation failed: {}", e.getMessage());
         }

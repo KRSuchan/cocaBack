@@ -16,7 +16,7 @@ import java.io.IOException;
 @Component
 @Slf4j
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
-
+    // 인증 실패 시 호출되는 EntryPoint
     @Override
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
