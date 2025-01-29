@@ -183,8 +183,9 @@ public class MemberService {
     public Member memberInfoUpdate(MemberUpdateRequest newInfo, MultipartFile profileImage) throws IOException {
         Member member = memberRepository.findById(newInfo.getId())
                 .orElseThrow(() -> new NoSuchElementException("회원이 조회되지 않습니다."));
-
-        member.setPassword(newInfo.getPassword());
+        if (!newInfo.getPassword().isEmpty() && !newInfo.getPassword().isBlank()) {
+            member.setPassword(newInfo.getPassword());
+        }
         member.setUserName(newInfo.getUserName());
 
         //새 관심사 넣기 전 기존 관심사 삭제
